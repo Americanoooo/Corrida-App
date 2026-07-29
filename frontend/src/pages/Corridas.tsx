@@ -33,8 +33,8 @@ function Corridas() {
 
     const hoje = new Date().toISOString().split("T")[0];
 
-  
-    const corridasFiltradas = motoCorridaFiltro 
+
+    const corridasFiltradas = motoCorridaFiltro
     ? corridas.filter((c)=> c.modelo ===motoCorridaFiltro)
     :corridas
 
@@ -135,12 +135,17 @@ setFim(hoje);
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-10  bg-slate-100">
-      <div className="flex flex-col justify-center bg-white p-2 rounded-xl shadow min-h-48 min-w-3xl">
-        <div className="flex justify-around">
-          <h2 className="text-xl font-semibold ">Cadastrar novas corridas</h2>
+    <div className="max-w-5xl mx-auto flex flex-col gap-8">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Corridas</h1>
+        <p className="text-slate-500 mt-1">Registre corridas e acompanhe seu lucro</p>
+      </div>
+
+      <div className="card p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
+          <h2 className="text-lg font-semibold text-slate-900">Cadastrar nova corrida</h2>
           <select
-            className="cursor-pointer"
+            className="select-field sm:w-56"
             value={moto_id}
             onChange={(e) => setMotoId(e.target.value)}
           >
@@ -152,61 +157,58 @@ setFim(hoje);
             ))}
           </select>
         </div>
-        <div className="flex  w-72 gap-5 px-2 py-5">
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <input
-          className="  px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition"    
+            className="input-field"
             placeholder="Kms Rodados"
             value={kmsRodados}
             onChange={(e) => setKmsRodados(e.target.value)}
           />
           <input
-           className="  px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition" 
+            className="input-field"
             placeholder="Receita"
             type="number"
             value={receita}
             onChange={(e) => setReceita(e.target.value)}
           />
           <input
-           className="  px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition" 
+            className="input-field"
             placeholder="Preço da gasolina"
             type="number"
             value={gasolina}
             onChange={(e) => setGasolina(e.target.value)}
           />
-         
         </div>
-         <input
-         className="  w-1/4 px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition cursor-pointer"
-            type="date"
-            value={data}
-            max={hoje}
-            onChange={(e) => setData(e.target.value)}
-          />
+
+        <input
+          className="input-field mt-4 sm:w-52"
+          type="date"
+          value={data}
+          max={hoje}
+          onChange={(e) => setData(e.target.value)}
+        />
+
         {erro && (
-          <p className="text-red-500 text-center">{erro}</p>
+          <p className="text-sm text-red-600 text-center mt-4">{erro}</p>
         )}
+
         <button
-          className="bg-blue-700 text-white rounded-xl p-2 w-1/6 cursor-pointer mx-auto"
+          className="btn-primary mt-5 w-full sm:w-auto sm:px-10"
           onClick={handleRegistrar}
         >
           Cadastrar
         </button>
       </div>
-      <div className=" flex flex-col py-3 bg-white mt-10 rounded-xl shadow min-h-110 min-w-3xl ">
-         <h2 className="text-xl text-center font-semibold">
+
+      <div className="card p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-lg font-semibold text-slate-900">
             Corridas realizadas
           </h2>
 
-        <select
-            className="cursor-pointer w-1/5 mx-auto mt-3"
+          <select
+            className="select-field sm:w-56"
             value={motoCorridaFiltro}
             onChange={(e) => setMotoCorridaFiltro(e.target.value)}
           >
@@ -217,81 +219,86 @@ setFim(hoje);
               </option>
             ))}
           </select>
-
-        {carregando ? (
-          <>
-          </>
-        ) : corridasFiltradas.length ===0 ? (
-          <>
-          </>
-        )
-        : (
-        <div className="py-5 px-10">
-         
-          <div className="flex justify-around">
-            <div className="flex gap-2 items-center">
-            
-                
-              <h2 className="text-lg font-semibold">Filtrar:</h2>
-
-              <button
-                className="bg-blue-700 text-white rounded-xl p-2 w-1/3 cursor-pointer mx-auto"
-                onClick={filtrarHoje}
-              >
-                Hoje
-              </button>
-              <button 
-              onClick={filtrarSemana}
-              className="bg-blue-700 text-white rounded-xl p-2 w-1/3 cursor-pointer mx-auto">
-                Semana
-              </button>
-              <button 
-              onClick={filtrarMes}
-              className="bg-blue-700 text-white rounded-xl p-2 w-1/3 cursor-pointer mx-auto">
-                Mês
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <h2 className="text-lg font-semibold">Inicio:</h2>
-              <input
-                type="date"
-                value={inicio}
-                onChange={(e) => setInicio(e.target.value)}
-              />
-              <h2 className="text-lg font-semibold">Fim:</h2>
-              <input
-                type="date"
-                value={fim}
-                onChange={(e) => setFim(e.target.value)}
-              />
-            </div>
-          </div>
-          
-
-          
         </div>
-        )
-         }
-      
-        <div className="flex flex-col gap-5 px-10 max-h-120 overflow-y-auto">
-          {carregando ?(
-            <h1 className="text-xl text-center mt-10 font-semibold">Carregando...</h1>
-          ) : corridasFiltradas.length ===0 ?(
-            <h1 className="text-xl text-center mt-10 font-semibold">Nenhuma corrida encontrada</h1> ) 
-            : ( corridasFiltradas.map((c) => (
-            <div key={c.id} className="flex justify-around">
-              <h2>Moto: {c.modelo}</h2>
-            <h2 className="font-semibold text-lg">Lucro: {formatarMoeda(c.lucro_real)}</h2>
-              <h2>Kms rodados: {c.kms_rodados} </h2>
-              <h2>Receita: {formatarMoeda(c.receita)}</h2>
-              <h2>Data: {new Date(c.data).toLocaleDateString("pt-BR")}</h2>
-            </div>
-          ))
-          )}
-          
+
+        
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-5 pt-5 border-t border-slate-100">
+
+          <div className="flex flex-wrap gap-2 items-center">
+
+            <span className="text-sm font-medium text-slate-500 mr-1">Filtrar:</span>
+
+            <button
+              className="btn-secondary px-3! py-1.5! text-sm"
+              onClick={filtrarHoje}
+            >
+              Hoje
+            </button>
+            <button
+            onClick={filtrarSemana}
+            className="btn-secondary px-3! py-1.5! text-sm">
+              Semana
+            </button>
+            <button
+            onClick={filtrarMes}
+            className="btn-secondary px-3! py-1.5! text-sm">
+              Mês
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="font-medium text-slate-500">Início:</span>
+            <input
+              className="input-field py-1.5! w-auto!"
+              type="date"
+              value={inicio}
+              onChange={(e) => setInicio(e.target.value)}
+            />
+            <span className="font-medium text-slate-500">Fim:</span>
+            <input
+              className="input-field py-1.5! w-auto!"
+              type="date"
+              value={fim}
+              onChange={(e) => setFim(e.target.value)}
+            />
+          </div>
+
+
         </div>
         
+         
+
+        <div className="flex flex-col mt-4 max-h-120 overflow-y-auto">
+          {carregando ?(
+            <p className="text-slate-500 text-center py-10">Carregando...</p>
+          ) : corridasFiltradas.length ===0 ?(
+            <p className="text-slate-500 text-center py-10">Nenhuma corrida encontrada</p>
+            )
+            : (
+            <>
+              <div className="hidden sm:grid sm:grid-cols-5 gap-4 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400 border-b border-slate-100">
+                <span>Moto</span>
+                <span>Data</span>
+                <span>Kms rodados</span>
+                <span>Receita</span>
+                <span className="text-right">Lucro</span>
+              </div>
+              {corridasFiltradas.map((c) => (
+              <div key={c.id} className="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-1 px-3 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition duration-150 text-sm">
+                <span className="text-slate-800 font-medium">{c.modelo}</span>
+                <span className="text-slate-500">{new Date(c.data).toLocaleDateString("pt-BR")}</span>
+                <span className="text-slate-500">{c.kms_rodados} Km</span>
+                <span className="text-slate-500">{formatarMoeda(c.receita)}</span>
+                <span className={`sm:text-right font-semibold ${Number(c.lucro_real) >= 0 ? "text-green-600" : "text-red-600"}`}>
+                  {formatarMoeda(c.lucro_real)}
+                </span>
+              </div>
+            ))}
+            </>
+          )}
+
+        </div>
+
 
         {carregando ? (
           <>
@@ -300,11 +307,14 @@ setFim(hoje);
           <>
           </>
         ):(
-        <h2 className="text-xl w-full mt-auto text-right px-3 py-5 font-semibold ml-auto">
-          Lucro total:{formatarMoeda(totalLucro)}
-        </h2>
+        <div className="flex items-center justify-end gap-2 mt-4 pt-5 border-t border-slate-200">
+          <span className="text-slate-500 font-medium">Lucro total:</span>
+          <span className={`text-xl font-bold ${totalLucro >= 0 ? "text-green-600" : "text-red-600"}`}>
+            {formatarMoeda(totalLucro)}
+          </span>
+        </div>
         )}
-        
+
       </div>
     </div>
   );

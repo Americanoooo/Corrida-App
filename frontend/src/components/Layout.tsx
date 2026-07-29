@@ -4,9 +4,9 @@ import Navbar from "./Navbar";
 
 function Layout(){
     return (
-        <div>
+        <div className="min-h-screen bg-slate-50">
             <Navbar />
-            <main>
+            <main className="px-4 sm:px-8 py-8">
                 <Outlet />
             </main>
         </div>

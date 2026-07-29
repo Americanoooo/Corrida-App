@@ -50,81 +50,79 @@ function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-200">
-      <div className="flex flex-col justify-center rounded-xl shadow items-center gap-1 min-h-100 p-2 text-center  bg-white mx-auto w-80 md:w-1/4">
-        <h1 className="text-xl font-semibold">CorridaApp</h1>
-
-        <div className="flex flex-col gap-4 py-1 px-5 w-full text-large ">
-          {cadastrar && (
-            <input
-className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition"              
-             placeholder="Nome"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-            />
-          )}
-          <input
-className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition"           
-              placeholder="Email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition"            
-             placeholder="Senha"
-            type="password"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-          />
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 via-blue-50 to-slate-100 px-4">
+      <div className="w-full max-w-sm">
+        <div className="flex flex-col items-center gap-2 mb-6">
+          <span className="h-12 w-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg font-bold shadow-md">CA</span>
+          <h1 className="text-2xl font-bold text-slate-900">CorridaApp</h1>
+          <p className="text-sm text-slate-500 text-center">Controle suas corridas com precisão</p>
         </div>
 
-        <div className="w-full flex flex-col gap-3 text-large  px-5">
-          <p  className={mensagem ?"text-red-500 " : "invisible"}>{mensagem}</p>
+        <div className="card p-8">
+          <h2 className="text-lg font-semibold text-slate-900 text-center mb-6">
+            {cadastrar ? "Criar conta" : "Entrar na sua conta"}
+          </h2>
 
-          {!cadastrar ? (
-               <button
-            className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition cursor-pointer"
-            onClick={()=> handleLogin(email, senha)}
-          >
-            Entrar
-          </button>
-         
-           
-          ) : (
+          <div className="flex flex-col gap-4">
+            {cadastrar && (
+              <input
+                className="input-field"
+                placeholder="Nome"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+              />
+            )}
+            <input
+              className="input-field"
+              placeholder="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              className="input-field"
+              placeholder="Senha"
+              type="password"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+            />
+          </div>
+
+          <div className="w-full flex flex-col gap-3 mt-5">
+            <p className={mensagem ? "text-sm text-red-600 text-center font-medium" : "invisible text-sm"}>{mensagem}</p>
+
+            {!cadastrar ? (
               <button
-              className="bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition cursor-pointer"
-              onClick={()=> handleCadastrar(nome, email, senha)}
-            >
-              Cadastrar
-            </button>
-           
-          )}
-
-                {!cadastrar ? (
-               <button
-            className="bg-slate-400 hover:bg-slate-500 text-white p-2 rounded  cursor-pointer"
-            onClick={(()=> {setCadastro(true)  ;limparForm()})}
-          >
-           Não tem uma conta?
-          </button>
-         
-          ) : (
+                className="btn-primary w-full"
+                onClick={()=> handleLogin(email, senha)}
+              >
+                Entrar
+              </button>
+            ) : (
               <button
-              className="bg-slate-400 hover:bg-slate-500 text-white p-2 rounded  cursor-pointer"
-              onClick={(()=>{ setCadastro(false); limparForm()})}
-            >
-              Voltar para o login
-            </button>
-           
-          )}
+                className="btn-primary w-full"
+                onClick={()=> handleCadastrar(nome, email, senha)}
+              >
+                Cadastrar
+              </button>
+            )}
 
+            {!cadastrar ? (
+              <button
+                className="btn-secondary w-full"
+                onClick={(()=> {setCadastro(true)  ;limparForm()})}
+              >
+                Não tem uma conta?
+              </button>
+            ) : (
+              <button
+                className="btn-secondary w-full"
+                onClick={(()=>{ setCadastro(false); limparForm()})}
+              >
+                Voltar para o login
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -53,7 +53,7 @@ function MotoPecas() {
       buscarPecas();
       setCusto('')
       setIntervaloKm('')
-      
+
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao buscar peças";
@@ -80,28 +80,34 @@ function MotoPecas() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100">
-      <div className="flex flex-col  gap-10 ">
+    <div className="max-w-4xl mx-auto flex flex-col gap-6">
+      <div>
         <Link
           to="/motos"
-          className="bg-slate-400 text-white w-16 p-2 text-center rounded-xl shadow"
+          className="btn-secondary w-fit"
         >
-          Voltar
+          ← Voltar
         </Link>
+      </div>
 
-        <div className="flex flex-col min-w-3xl  gap-6 min-h-56  mx-auto p-6 bg-white rounded-xl">
-          <div className="flex justify-around items-start gap-5">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Peças da moto</h1>
+        <p className="text-slate-500 mt-1">Gerencie as peças vinculadas a esta moto</p>
+      </div>
+
+      <div className="card p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Vincular peça</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <select
-            className="cursor-pointer"
+            className="select-field"
             value={pecaId}
             onChange={(e) => setPecaId(e.target.value)}
           >
-            <option 
-            className="font-semibold"
+            <option
             value={""}>Escolha uma peça</option>
             {catalogo.map((peca) => (
-              <option 
-              className="font-semibold"
+              <option
               key={peca.id} value={peca.id}
               >
                 {capitalizar(peca.nome)}
@@ -109,23 +115,16 @@ function MotoPecas() {
             ))}
           </select>
 
-          <input 
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition"
+          <input
+          className="input-field"
            placeholder="Custo"
            type="number"
             value={custo}
             onChange={(e) => setCusto(e.target.value)}
           />
-          
-           
-          
 
           <input
-           className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm
-             focus:outline-none focus:ring-2 focus:ring-blue-500
-             focus:border-blue-500 transition"
+           className="input-field"
             placeholder="Quantos Km"
             type="number"
             value={intervaloKm}
@@ -133,42 +132,48 @@ function MotoPecas() {
           />
           <button
             onClick={handleVincular}
-            className="cursor-pointer bg-blue-600 text-white px-2 h-10  rounded"
+            className="btn-primary"
           >
             Cadastrar
           </button>
-           </div>
-            {erro && (
-              <p className="text-center text-red-500 ">{erro}</p>
-            )}
         </div>
-        
-        <div className=" h-56 min-w-3xl flex flex-col  p-2 bg-white w-1/2 md:w-1/4 rounded-xl shadow overflow-y-auto ">
-          <h1 className="text-center text-xl font-semibold">
-            Peças cadastradas
-          </h1>
+        {erro && (
+          <p className="text-sm text-red-600 text-center mt-4">{erro}</p>
+        )}
+      </div>
 
-          {carregando ? (
-            <h2>Carregando...</h2>
-          ) : pecas.length === 0 ? (
-            <h2 className="text-center mt-5">Nenhuma peça cadastrada</h2>
-          ) : (
-            pecas.map((peca) => (
-              <div key={peca.id} className="grid grid-cols-3 gap-4 py-2 border-b text-large ">
-                <h2 className="capitalize font-semibold" >{peca.nome}</h2>
-                <h3 className="capitalize">
+      <div className="card p-6">
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">
+          Peças cadastradas
+        </h2>
+
+        {carregando ? (
+          <p className="text-slate-500 text-center py-10">Carregando...</p>
+        ) : pecas.length === 0 ? (
+          <p className="text-slate-500 text-center py-10">Nenhuma peça cadastrada</p>
+        ) : (
+          <div className="flex flex-col max-h-80 overflow-y-auto">
+            <div className="hidden sm:grid sm:grid-cols-3 gap-4 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400 border-b border-slate-100">
+              <span>Peça</span>
+              <span>Custo / Intervalo</span>
+              <span>Custo por Km</span>
+            </div>
+            {pecas.map((peca) => (
+              <div key={peca.id} className="grid grid-cols-1 sm:grid-cols-3 gap-1 sm:gap-4 px-3 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition duration-150 text-sm">
+                <h2 className="capitalize font-semibold text-slate-800" >{peca.nome}</h2>
+                <h3 className="capitalize text-slate-600">
                   {formatarMoeda(peca.custo)} - {peca.intervalo_km}Km
                 </h3>
-                <p className="capitalize">
+                <p className="capitalize text-slate-600">
                   Custo por Km{" "}
                   {formatarMoeda(
                     Number(peca.custo) / Number(peca.intervalo_km),
                   )}
                 </p>
               </div>
-            ))
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
