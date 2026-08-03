@@ -1,4 +1,4 @@
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { apiFetch } from "../api";
 import { formatarMoeda } from "../utils/FormatarMoeda";
