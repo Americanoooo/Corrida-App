@@ -1,7 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../db";
 import { AppError } from "../Erros/AppError";
-import { calcularCustoKm } from "../calculos";
+import { calcularCustoCombustivel, calcularCustoKm } from "../calculos";
 
 export async function criarCorrida(
   usuario_id: number,
@@ -80,7 +80,7 @@ export async function buscarCorridaPorId(
   const gasolina = Number(corrida.gasolina_congelada);
   const kmLitro = Number(corrida.km_litro);
 
-  const custoCombustivel = (km / kmLitro) * gasolina;
+  const custoCombustivel = calcularCustoCombustivel(km  ,kmLitro , gasolina);
 
   const somaCustoKm = linhas.reduce(
     (acc, linha) => acc + Number(linha.custo_km_congelado),

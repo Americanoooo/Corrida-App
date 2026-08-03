@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec tsx src/server.ts",
-    "test": "jest"
+  "dev": "nodemon --exec tsx src/server.ts",
+  "build": "tsc",
+  "start": "node dist/server.js",
+  "test": "jest"
   },
   "keywords": [],
   "author": "",

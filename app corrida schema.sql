@@ -4,6 +4,14 @@
 -- tabelas referenciadas primeiro, junções depois.
 -- ============================================
 
+-- Usuário
+CREATE TABLE usuario (
+  id          INT AUTO_INCREMENT PRIMARY KEY,
+  nome        VARCHAR(100) NOT NULL,
+  email       VARCHAR(255) NOT NULL UNIQUE,
+  senha_hash  VARCHAR(255) NOT NULL
+);
+
 -- 1. Catálogo puro (só PK)
 CREATE TABLE moto (
   id        INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,10 +41,12 @@ CREATE TABLE moto_peca (
 CREATE TABLE corrida (
   id                  INT AUTO_INCREMENT PRIMARY KEY,
   moto_id             INT NOT NULL,
+  usuario_id 		  INT NULL,
   kms_rodados         DECIMAL(5,2),
   receita             DECIMAL(5,2),
   gasolina_congelada  DECIMAL(5,2),
-  FOREIGN KEY (moto_id) REFERENCES moto(id)
+  FOREIGN KEY (moto_id) REFERENCES moto(id),
+  FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 
 -- 5. Snapshot: custo/km de cada peça congelado no momento da corrida

@@ -9,3 +9,8 @@ export function calcularCustoKm(custo:number, intervaloKm:number):number{
     return  custo / intervaloKm
      
 }
+
+export function calcularCustoCombustivel(km:number, kmLitro:number, gasolina:number):number{
+
+    return (km / kmLitro) * gasolina
+}
