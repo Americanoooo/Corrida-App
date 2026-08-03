@@ -1,6 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../db";
 import { AppError } from "../Erros/AppError";
+import { calcularCustoKm } from "../calculos";
 
 export async function criarCorrida(
   usuario_id: number,
@@ -41,7 +42,7 @@ export async function criarCorrida(
     }
 
     for (const peca of pecas) {
-      const custoKm = Number(peca.custo) / Number(peca.intervalo_km);
+      const custoKm = calcularCustoKm(peca.custo, peca.intervalo_km);
       await conn.query(
         "INSERT INTO corrida_peca (corrida_id, moto_peca_id, custo_km_congelado) VALUES (?,?,?)",
         [corrida.insertId, peca.id, custoKm],

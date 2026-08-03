@@ -189,16 +189,17 @@ setFim(hoje);
           onChange={(e) => setData(e.target.value)}
         />
 
-        {erro && (
-          <p className="text-sm text-red-600 text-center mt-4">{erro}</p>
-        )}
+        
 
         <button
-          className="btn-primary mt-5 w-full sm:w-auto sm:px-10"
+          className="btn-primary mt-5 mx-auto w-full sm:w-auto sm:px-10"
           onClick={handleRegistrar}
         >
           Cadastrar
         </button>
+        {erro && (
+          <p className="text-sm text-red-600 text-center mt-4">{erro}</p>
+        )}
       </div>
 
       <div className="card p-6">
