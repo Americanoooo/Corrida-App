@@ -22,7 +22,6 @@ function Login() {
       navigate("/motos");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao fazer login";
-      console.log(msg)
       setMensagem('Email ou senha inválidos');
     }
   }

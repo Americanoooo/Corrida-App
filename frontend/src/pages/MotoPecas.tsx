@@ -34,7 +34,6 @@ function MotoPecas() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao buscar peças";
-        console.log(message)
       }
 
   }
@@ -53,12 +52,13 @@ function MotoPecas() {
       buscarPecas();
       setCusto('')
       setIntervaloKm('')
+      setErro('')
 
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Erro ao buscar peças";
-        console.log(message)
-        }
+        err instanceof Error ? err.message : "Erro ao cadastrar peças";
+        setErro(message)  
+      }
   }
 
   useEffect(() => {
@@ -72,7 +72,6 @@ function MotoPecas() {
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : "Erro ao buscar peças";
-          console.log(message)
         } finally {
         setCarregando(false);
       }

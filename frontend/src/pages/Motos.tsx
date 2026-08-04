@@ -23,7 +23,6 @@ function Motos() {
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Erro ao buscar motos";
-        console.log(message)
         }finally{
     setCarregando(false)
   }}
@@ -46,7 +45,6 @@ function Motos() {
     setErro('')
     }catch(err:unknown){
       const message = err instanceof Error ? err.message : 'Erro ao cadastrar'
-      console.log(message)
     }
 
   }
