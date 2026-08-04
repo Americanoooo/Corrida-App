@@ -24,14 +24,14 @@ function Corridas() {
   const [kmsRodados, setKmsRodados] = useState("");
   const [receita, setReceita] = useState("");
   const [gasolina, setGasolina] = useState("");
-  const [data, setData] = useState("");
+      const hoje = new Date().toISOString().split("T")[0];
+  const [data, setData] = useState(hoje);
   const [erro, setErro] = useState("");
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
   const [motoCorridaFiltro, setMotoCorridaFiltro]=useState('')
   const [carregando, setCarregando]=useState(true)
 
-    const hoje = new Date().toISOString().split("T")[0];
 
 
     const corridasFiltradas = motoCorridaFiltro
