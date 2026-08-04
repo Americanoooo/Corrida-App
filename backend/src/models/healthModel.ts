@@ -8,8 +8,12 @@ export async function getHealth(req: Request, res:Response){
          await pool.query(
         'SELECT 1'
     )
-    res.status(200).json({status: 'Banco ok rodando'})
+    res.status(200).json({
+        status: 'ok',
+      database: 'connected',
+      timestamp: new Date().toISOString()})
     }catch(err:unknown){
-        res.status(500).json({message: 'Erro desconhecido'})
+        res.status(500).json({status: 'error',
+      database: 'disconnected'})
     }
 }
