@@ -5,6 +5,7 @@ import motoRoutes  from "./routes/motoRoutes";
 import pecaRoutes from './routes/pecaRoutes';
 import corridaRoutes from './routes/corridaRoutes';
 import usuarioRoutes from './routes/usuarioRoutes';
+import { getHealth } from "./models/healthModel";
 
 dotenv.config();
 
@@ -13,9 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 
-app.get('/health', (req,res)=> {
-    res.json({status: 'Ok'});
-});
+app.use('/health', getHealth)
 
 app.use('/motos', motoRoutes)
 app.use('/pecas', pecaRoutes)
