@@ -5,7 +5,7 @@ import motoRoutes  from "./routes/motoRoutes";
 import pecaRoutes from './routes/pecaRoutes';
 import corridaRoutes from './routes/corridaRoutes';
 import usuarioRoutes from './routes/usuarioRoutes';
-import { getHealth } from "./models/healthModel";
+import { getHealth } from "./health";
 
 dotenv.config();
 
