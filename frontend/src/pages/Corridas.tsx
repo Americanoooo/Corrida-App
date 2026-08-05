@@ -95,7 +95,6 @@ function Corridas() {
       setKmsRodados("");
       setReceita("");
       setGasolina("");
-      setData("");
     } catch (err: unknown) {
       if(err instanceof ApiError && err.status ===400){
         setErro('Nenhuma peça cadastrada')
