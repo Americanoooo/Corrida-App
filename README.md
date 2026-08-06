@@ -46,10 +46,21 @@ O resultado é um diagnóstico que o motorista raramente tem: quanto ele *de fat
 - **Transação atômica:** o registro de corrida grava a corrida e os snapshots das peças de forma tudo-ou-nada, com rollback em caso de falha.
 - **DECIMAL para dinheiro:** evita os erros de arredondamento do FLOAT em valores monetários.
 
+## Qualidade e testes
+- Testes automatizados com **Jest + ts-jest** cobrindo o núcleo de cálculo
+  (o coração do valor do app), incluindo casos de borda: intervalo ou custo
+  inválidos disparam erro em vez de gerar lucro silenciosamente errado.
+- A lógica de cálculo foi **extraída em funções puras**, testável de forma
+  isolada — sem subir servidor nem depender do banco.
+- Parte da suíte escrita com **TDD** (teste antes da implementação).
+
 ## Repositórios
 
 - **Backend:** https://github.com/Americanoooo/Corrida-App/tree/main/backend
 - **Frontend:** https://github.com/Americanoooo/Corrida-App/tree/main/frontend
+
+🔗 **Demo ao vivo:** https://corrida-app-zvbj.vercel.app/login
+**Conta de teste:** admin@admin.com / admin123 _(já vem com dados cadastrados)_
 
 ## Autor
 
