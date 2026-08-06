@@ -18,3 +18,6 @@ export async function listarMoto(usuario_id:number){
     return resultado
 }
 
+export async function editarGasolina(usuario_id:number){
+
+}

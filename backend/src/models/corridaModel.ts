@@ -16,7 +16,7 @@ export async function criarCorrida(
     await conn.beginTransaction();
 
     const [motos] = await conn.query<RowDataPacket[]>(
-      "SELECT usuario_id FROM moto WHERE id =?",
+      "SELECT usuario_id, km_litro FROM moto WHERE id =?",
       [moto_id],
     );
     const moto = motos[0];
@@ -26,15 +26,15 @@ export async function criarCorrida(
     if (moto.usuario_id !== usuario_id) {
       throw new Error("Essa moto não é sua");
     }
-
+    const km_litro_congelado = moto.km_litro
     const [pecas] = await conn.query<RowDataPacket[]>(
       "SELECT * FROM moto_peca WHERE moto_id = ? ",
       [moto_id],
     );
-
+    
     const [corrida] = await conn.query<ResultSetHeader>(
-      "INSERT INTO corrida (usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data) VALUES(?,?,?,?,?,?)",
-      [usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data],
+      "INSERT INTO corrida (usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data, km_litro_congelado) VALUES(?,?,?,?,?,?, ?)",
+      [usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data, km_litro_congelado],
     );
 
     if (pecas.length === 0) {
@@ -64,7 +64,7 @@ export async function buscarCorridaPorId(
   usuario_id: number,
 ) {
   const [linhas] = await pool.query<RowDataPacket[]>(
-    `SELECT corrida.id, corrida.kms_rodados, corrida.receita, corrida.gasolina_congelada, moto.km_litro, peca.nome, corrida_peca.custo_km_congelado 
+    `SELECT corrida.id, corrida.kms_rodados, corrida.receita, corrida.gasolina_congelada, corrida.km_litro_congelado, peca.nome, corrida_peca.custo_km_congelado 
          FROM corrida
         JOIN corrida_peca ON corrida.id = corrida_peca.corrida_id
         JOIN moto ON corrida.moto_id = moto.id
@@ -78,7 +78,8 @@ export async function buscarCorridaPorId(
   const km = Number(corrida.kms_rodados);
   const receita = Number(corrida.receita);
   const gasolina = Number(corrida.gasolina_congelada);
-  const kmLitro = Number(corrida.km_litro);
+  const kmLitro = Number(corrida.km_litro_congelado);
+  
 
   const custoCombustivel = calcularCustoCombustivel(km  ,kmLitro , gasolina);
 
@@ -113,7 +114,7 @@ export async function relatorioPorPeriodo(
     `SELECT
         SUM(corrida.receita) AS receita_total,
         SUM(desgaste.total * corrida.kms_rodados) AS desgaste_total,
-        SUM((corrida.kms_rodados / moto.km_litro) * corrida.gasolina_congelada) AS combustivel_total
+        SUM((corrida.kms_rodados / corrida.km_litro_congelado) * corrida.gasolina_congelada) AS combustivel_total
         FROM corrida
         JOIN ( SELECT corrida_id, SUM(custo_km_congelado) AS total
             FROM corrida_peca GROUP BY corrida_id) AS desgaste
@@ -136,7 +137,7 @@ export async function buscarTodasCorridas(usuario_id: number, inicio?: string,fi
   let sql =     `SELECT
   corrida.id, corrida.data, corrida.receita, corrida.kms_rodados, moto.modelo,
   corrida.receita
-    - ((corrida.kms_rodados / moto.km_litro) * corrida.gasolina_congelada)
+    - ((corrida.kms_rodados / corrida.km_litro_congelado) * corrida.gasolina_congelada)
     - (desgaste.total * corrida.kms_rodados) AS lucro_real
 FROM corrida
 JOIN (
@@ -158,4 +159,6 @@ sql += ` ORDER BY corrida.data DESC`;
   const [linhas] = await pool.query<RowDataPacket[]>(sql, params);
   return linhas;
 }
+
+
 
