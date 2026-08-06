@@ -48,6 +48,7 @@ function Corridas() {
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : "Erro ao buscar motos";
+          console.log(message)
       }
     }
     buscarMotos();
@@ -65,6 +66,8 @@ function Corridas() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao buscar motos";
+                  console.log(message)
+
     }finally{
       setCarregando(false)
     }
@@ -101,6 +104,8 @@ function Corridas() {
       }
       const message =
         err instanceof Error ? err.message : "Erro ao cadastrar corridas";
+                  console.log(message)
+
     }
     buscarCorridas();
   }
