@@ -161,4 +161,3 @@ sql += ` ORDER BY corrida.data DESC`;
 }
 
 
-
