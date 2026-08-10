@@ -79,6 +79,8 @@ function Motos() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao editar moto";
+              console.log(message);
+
       setFeedback({texto:'Preencha todos os campos', tipo:'erro'});
     }
   }
