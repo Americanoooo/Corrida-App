@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { apiFetch } from "../api";
 import { formatarMoeda } from "../utils/FormatarMoeda";
 import { capitalizar } from "../utils/Capitalizar";
+import { useToast } from "../context/ToastContext";
 
 
 interface MotoPeca {
@@ -27,6 +28,8 @@ function MotoPecas() {
   const [custo, setCusto] = useState("");
   const [intervaloKm, setIntervaloKm] = useState("");
 
+  const mostrarToast = useToast()
+
   async function buscarPecas() {
     try {
       const data = await apiFetch(`/motos/${motoId}/pecas`);
@@ -34,8 +37,7 @@ function MotoPecas() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao buscar peças";
-            console.log(message)
-
+mostrarToast(message, "erro")
       }
 
   }
@@ -74,7 +76,7 @@ function MotoPecas() {
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : "Erro ao buscar peças";
-          console.log(message)
+          mostrarToast(message, "erro")
         } finally {
         setCarregando(false);
       }

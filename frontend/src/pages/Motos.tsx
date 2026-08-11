@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { Link } from "react-router-dom";
+import { useToast } from "../context/ToastContext";
 
 interface Moto {
   id: number;
@@ -19,6 +20,7 @@ function Motos() {
   const [motoEditando, setMotoEditando] = useState<Moto | null>(null);
   const [modeloEditando, setModeloEditando] = useState("");
   const [kmLitroEditando, setKmLitroEditando] = useState("");
+  const mostrarToast = useToast();
   const [feedback, setFeedback] = useState<{texto:string; tipo:"erro" | "ok"} | null>(null);
 
   const feedbackClasse = !feedback ? "invisible"
@@ -60,28 +62,27 @@ function Motos() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao cadastrar motos";
-      console.log(message);
-    }
+      mostrarToast(message, "erro")
+      }
   }
 
   async function handleEditar() {
     if (!modeloEditando || !kmLitroEditando)
       return setFeedback({texto:'Preencha todos os campos', tipo:'erro'});
+    if(kmLitroEditando === "0") return setFeedback({texto: "Preencha com um número válido", tipo: "erro"})
     try {
       
       await apiFetch(`/motos/${motoEditando?.id}`, {
         method: "PATCH",
         body: JSON.stringify({ modelo: modeloEditando, km_litro: kmLitroEditando }),
       });
-      setFeedback({texto:'Moto atualizada!', tipo:'ok'});
+      mostrarToast('Moto atualizada!', "ok")
       buscarMotos();
 
     } catch (err: unknown) {
       const message =
-        err instanceof Error ? err.message : "Erro ao editar moto";
-              console.log(message);
-
-      setFeedback({texto:'Preencha todos os campos', tipo:'erro'});
+        err instanceof Error ? err.message : "Erro ao editar";
+              mostrarToast(message, "erro")
     }
   }
 

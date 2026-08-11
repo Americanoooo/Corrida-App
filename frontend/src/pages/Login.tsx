@@ -21,10 +21,9 @@ function Login() {
       localStorage.setItem("token", data.token);
       navigate("/motos");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Erro ao fazer login";
+      const msg = err instanceof Error ? err.message : "Email ou senha inválidos";
 
-      setMensagem('Email ou senha inválidos');
-      console.log(msg)
+      setMensagem(msg);
     }
   }
 

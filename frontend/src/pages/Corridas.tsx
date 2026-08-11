@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { formatarMoeda } from "../utils/FormatarMoeda";
 import { ApiError } from "../Erros/ApiError";
+import { useToast } from "../context/ToastContext";
 
 interface Moto {
   id: number;
@@ -31,7 +32,7 @@ function Corridas() {
   const [fim, setFim] = useState("");
   const [motoCorridaFiltro, setMotoCorridaFiltro]=useState('')
   const [carregando, setCarregando]=useState(true)
-
+  const mostrarToast = useToast()
 
 
     const corridasFiltradas = motoCorridaFiltro
@@ -48,8 +49,8 @@ function Corridas() {
       } catch (err: unknown) {
         const message =
           err instanceof Error ? err.message : "Erro ao buscar motos";
-          console.log(message)
-      }
+          mostrarToast(message, "erro")
+        }
     }
     buscarMotos();
   }, []);
@@ -66,7 +67,7 @@ function Corridas() {
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : "Erro ao buscar motos";
-                  console.log(message)
+      mostrarToast(message, "erro")
 
     }finally{
       setCarregando(false)
@@ -104,8 +105,7 @@ function Corridas() {
       }
       const message =
         err instanceof Error ? err.message : "Erro ao cadastrar corridas";
-                  console.log(message)
-
+mostrarToast(message, "erro")
     }
     buscarCorridas();
   }
@@ -163,6 +163,7 @@ setFim(hoje);
           <input
             className="input-field"
             placeholder="Kms Rodados"
+            type="number"
             value={kmsRodados}
             onChange={(e) => setKmsRodados(e.target.value)}
           />
