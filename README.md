@@ -2,6 +2,9 @@
 
 Aplicação full-stack que calcula o **lucro real** de motoristas de aplicativo — não apenas `receita − gasolina`, mas o lucro que sobra depois de contabilizar o **desgaste diluído das peças** que cada corrida consome.
 
+🔗 **Demo ao vivo:** https://corrida-app-zvbj.vercel.app/login
+**Conta de teste:** admin@admin.com / admin123 _(já vem com dados cadastrados)_
+
 ## O problema
 
 Motoristas de aplicativo costumam confundir **faturamento bruto** com **lucro real**. Descontam a gasolina, mas ignoram algo que corrói a margem silenciosamente: cada quilômetro rodado desgasta óleo, relação, pneus e freios. Uma corrida que parece lucrativa pode, no fim, dar pouco ou nenhum lucro depois desse desgaste — e nenhum app existente mostra isso.
@@ -38,6 +41,7 @@ O resultado é um diagnóstico que o motorista raramente tem: quanto ele *de fat
 - Cálculo automático de receita bruta e lucro real por corrida
 - Filtro de corridas por período e por moto
 - Total de lucro consolidado do período selecionado
+- Edição de motos e das peças cadastradas
 
 ## Destaques técnicos
 
@@ -45,7 +49,7 @@ O resultado é um diagnóstico que o motorista raramente tem: quanto ele *de fat
 - **Multi-tenant:** isolamento de dados por usuário, com `usuario_id` sempre derivado do token JWT (nunca do corpo da requisição) e verificação de posse antes de cada operação.
 - **Transação atômica:** o registro de corrida grava a corrida e os snapshots das peças de forma tudo-ou-nada, com rollback em caso de falha.
 - **DECIMAL para dinheiro:** evita os erros de arredondamento do FLOAT em valores monetários.
-
+  
 ## Qualidade e testes
 - Testes automatizados com **Jest + ts-jest** cobrindo o núcleo de cálculo
   (o coração do valor do app), incluindo casos de borda: intervalo ou custo
@@ -59,8 +63,6 @@ O resultado é um diagnóstico que o motorista raramente tem: quanto ele *de fat
 - **Backend:** https://github.com/Americanoooo/Corrida-App/tree/main/backend
 - **Frontend:** https://github.com/Americanoooo/Corrida-App/tree/main/frontend
 
-🔗 **Demo ao vivo:** https://corrida-app-zvbj.vercel.app/login
-**Conta de teste:** admin@admin.com / admin123 _(já vem com dados cadastrados)_
 
 ## Autor
 
