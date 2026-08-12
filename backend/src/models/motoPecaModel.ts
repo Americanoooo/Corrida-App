@@ -1,4 +1,5 @@
 import { RowDataPacket } from "mysql2";
+import { ResultSetHeader } from "mysql2";
 import pool from "../db";
 
 
@@ -30,4 +31,16 @@ export async function listarMotoPecas(moto_id:number, usuario_id:number){
         [moto_id, usuario_id]
     )
     return resultado
+}
+
+export async function editarMotoPecas(usuario_id:number, moto_id:number,peca_id:number,  custo:number, intervalo_km:number){
+    const [resultado] = await pool.query<ResultSetHeader>(
+        `UPDATE moto_peca
+        JOIN moto ON moto_peca.moto_id = moto.id
+        SET moto_peca.custo = ?, moto_peca.intervalo_km = ?
+        WHERE moto_peca.id = ? AND moto_peca.moto_id =? AND moto.usuario_id =?`,
+        [custo, intervalo_km, peca_id, moto_id, usuario_id]
+    )
+    return resultado
+
 }

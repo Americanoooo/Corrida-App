@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { Link } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
+import { ApiError } from "../Erros/ApiError";
 
 interface Moto {
   id: number;
@@ -33,11 +34,13 @@ function Motos() {
     try {
       const data = await apiFetch("/motos");
       setMotos(data);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Erro ao buscar motos";
-      console.log(message);
-    } finally {
+    } catch (err: unknown) {
+          if(err instanceof ApiError && err.status < 500){
+            mostrarToast(err.message, "erro");
+          }else{
+                mostrarToast("Algo deu errado. Tente novamente.", "erro");
+          }
+      } finally {
       setCarregando(false);
     }
   }
@@ -60,10 +63,12 @@ function Motos() {
       setKmLitro("");
       setErro("");
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Erro ao cadastrar motos";
-      mostrarToast(message, "erro")
+      if(err instanceof ApiError && err.status < 500){
+        mostrarToast(err.message, "erro");
+      }else{
+            mostrarToast("Algo deu errado. Tente novamente.", "erro");
       }
+  }
   }
 
   async function handleEditar() {
@@ -80,10 +85,12 @@ function Motos() {
       buscarMotos();
 
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Erro ao editar";
-              mostrarToast(message, "erro")
-    }
+      if(err instanceof ApiError && err.status < 500){
+        mostrarToast(err.message, "erro");
+      }else{
+            mostrarToast("Algo deu errado. Tente novamente.", "erro");
+      }
+  }
   }
 
   useEffect(() => {

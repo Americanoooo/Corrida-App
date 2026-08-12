@@ -47,10 +47,12 @@ function Corridas() {
         const todasMotos = await apiFetch(`/motos`);
         setMotos(todasMotos);
       } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Erro ao buscar motos";
-          mostrarToast(message, "erro")
-        }
+      if(err instanceof ApiError && err.status < 500){
+        mostrarToast(err.message, "erro");
+      }else{
+            mostrarToast("Algo deu errado. Tente novamente.", "erro");
+      }
+  }
     }
     buscarMotos();
   }, []);
@@ -64,12 +66,13 @@ function Corridas() {
 
       const data = await apiFetch(url);
       setCorridas(data);
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Erro ao buscar motos";
-      mostrarToast(message, "erro")
-
-    }finally{
+    }catch (err: unknown) {
+      if(err instanceof ApiError && err.status < 500){
+        mostrarToast(err.message, "erro");
+      }else{
+            mostrarToast("Algo deu errado. Tente novamente.", "erro");
+      }
+  }finally{
       setCarregando(false)
     }
   }
