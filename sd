@@ -1,0 +1,149 @@
+[33mcommit 4a6ba25e41ef95921921644cb59e05b9ed65e6f4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Cauã Gabriel Araujo Americano <165438992+Americanoooo@users.noreply.github.com>
+Date:   Wed Aug 12 18:33:59 2026 -0300
+
+    Update README with demo link and test account
+    
+    Added live demo link and test account information to README.
+
+[33mcommit e7c2bea3b5043d225e6655560fbd2006085c243c[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Wed Aug 12 18:27:06 2026 -0300
+
+    Adicionar feature de editar peças
+
+[33mcommit 5ff15cce634b9e9b4fe76cb9a9303e930f391464[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Tue Aug 11 18:25:34 2026 -0300
+
+    Adicionar toast pra tratar os erros através de Context
+
+[33mcommit df7d56bc19b4290cb899435e3fcb7e854bfd785d[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Mon Aug 10 19:20:37 2026 -0300
+
+    Adicionar console.log pra buildar no vercel
+
+[33mcommit ba2fda1e06b5f9195264f456c00389f499b7fe57[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Mon Aug 10 19:17:19 2026 -0300
+
+    Adicionar a feature de editar a moto
+
+[33mcommit 90e602eaf5cb86da82e60571fd56f0b390be239f[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Thu Aug 6 17:46:07 2026 -0300
+
+    Corrigir os catchs do front pra build funcionar
+
+[33mcommit 7cfd11a8678dd60d3611d54e99894a697e14b83c[m
+Merge: 615fe35 a112756
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Thu Aug 6 17:32:48 2026 -0300
+
+    Merge branch 'main' of https://github.com/Americanoooo/Corrida-App
+
+[33mcommit 615fe357502621a3e548921cf3f8bda5e8285396[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Thu Aug 6 17:32:15 2026 -0300
+
+    Congelar quantos Km a moto faz por litro na hora de registrar a corrida
+
+[33mcommit a112756e65300176792eb755793309fda56323b9[m
+Author: Cauã Gabriel Araujo Americano <165438992+Americanoooo@users.noreply.github.com>
+Date:   Wed Aug 5 19:22:51 2026 -0300
+
+    Add quality and testing section to README
+    
+    Added a section on quality and testing, detailing automated tests, pure functions, and TDD methodology.
+
+[33mcommit 176cd6eefdf73287e27eff862f16cd617424cd00[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Wed Aug 5 19:17:10 2026 -0300
+
+    Corrigir data depois de cadastrar corrida
+
+[33mcommit ffcd801d524862eedcc79a9a5e21920fbf3a3af2[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Wed Aug 5 18:46:23 2026 -0300
+
+    Alterar o local do health.ts
+
+[33mcommit a584da44d32254f5326329d09f24ff4c75400e16[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Tue Aug 4 19:07:01 2026 -0300
+
+    Atualizar a requisição do health
+
+[33mcommit 06a44290f3cec54d72f4df7912e05386b284af02[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Tue Aug 4 19:03:31 2026 -0300
+
+    Atualizar a requisição do health
+
+[33mcommit c30f9f3666df09597dc51932ba658c7b08c05764[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Tue Aug 4 18:33:28 2026 -0300
+
+    Tratar erro das requisições e melhorias no layout
+
+[33mcommit 60c0fd2540b71dc8002eeb1597869d755c9135b1[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Tue Aug 4 18:00:38 2026 -0300
+
+    Atualizar schema.sql e corrigir valor inicial da data na corrida
+
+[33mcommit 47b18ac8950d89aede4c68c4913ec1eec9559dda[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Mon Aug 3 19:14:01 2026 -0300
+
+    config vercel para SPA estática
+
+[33mcommit f16a2c14984c16e1433c1163bb46daac172cb4ca[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Mon Aug 3 19:06:15 2026 -0300
+
+    remove imports não usados
+
+[33mcommit c9b515d3800235fc79fb4d875950be05f163f86e[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Mon Aug 3 19:01:23 2026 -0300
+
+    api aponta pra VITE_API_URL
+
+[33mcommit 53bf80c748195832ad5fc92016da0c9522999477[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Mon Aug 3 18:55:49 2026 -0300
+
+    adicionar packjage.json
+
+[33mcommit 05a164c46852f33a5a644d6c5f93763a1888c3f0[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Mon Aug 3 17:08:10 2026 -0300
+
+    Testes com Jest
+
+[33mcommit 2b9734912c83ac523a18e84155cf95cf76d0d28d[m
+Merge: 5bec1f3 60b2021
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Wed Jul 29 18:46:46 2026 -0300
+
+    Merge branch 'main' of https://github.com/Americanoooo/Corrida-App
+
+[33mcommit 5bec1f3854498cbc42c39f352293f51e35373ff8[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Wed Jul 29 18:45:09 2026 -0300
+
+    Mudanças no layout
+
+[33mcommit 60b2021e17c81a57748e617546fab5f6ebc5914c[m
+Author: Cauã Gabriel Araujo Americano <165438992+Americanoooo@users.noreply.github.com>
+Date:   Wed Jul 29 18:03:52 2026 -0300
+
+    Create README.md
+
+[33mcommit cd6d4f7bdde556dbcc6e4208b532e17297467593[m
+Author: Americano <caua.americano0710@gmail.com>
+Date:   Wed Jul 29 16:44:41 2026 -0300
+
+    Primeiro commit: calculadora de lucro de corridas de moto
