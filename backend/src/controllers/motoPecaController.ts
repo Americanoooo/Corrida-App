@@ -25,14 +25,14 @@ export async function postMotoPeca(req:Request, res:Response){
 
         const {peca_id, custo, intervalo_km} = req.body
          if(custo<=0 || intervalo_km<= 0 || !peca_id){
-        return res.status(400).json({error: "Dados inválidos"})
-    }
+            return res.status(400).json({error: "Dados inválidos"})
+        }
 
         const resultado =await criarMotoPeca(moto_id, peca_id, custo, intervalo_km)
-        res.status(201).json({message: 'Peça da moto cadastrada com sucesso', resultado})
+        return  res.status(201).json({message: 'Peça da moto cadastrada com sucesso', resultado})
     }catch(err:unknown){
         if(err instanceof Error && (err as any).code ==='ER_DUP_ENTRY'){
-            res.status(409).json({error: 'Essa peça já está cadastrada nessa moto'})
+           return res.status(409).json({error: 'Essa peça já está cadastrada nessa moto'})
         }
 
         const message = err instanceof Error ? err.message : 'Erro desconhecido'

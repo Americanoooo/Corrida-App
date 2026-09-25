@@ -13,6 +13,7 @@ export async function getHealth(req: Request, res:Response){
       database: 'connected',
       timestamp: new Date().toISOString()})
     }catch(err:unknown){
+      console.error(err)
         res.status(500).json({status: 'error',
       database: 'disconnected'})
     }
