@@ -1,16 +1,28 @@
 import { RowDataPacket } from "mysql2";
 import { ResultSetHeader } from "mysql2";
 import pool from "../db";
+import { AppError } from "../Erros/AppError";
 
 
 
-export async function criarMotoPeca(moto_id:number, peca_id: number, custo:number, intervalo_km:number ){
+
+
+export async function criarMotoPeca(moto_id:number, peca_id: number, custo:number, intervalo_km:number){
+    try{
     const [resultado] = await pool.query(
         'INSERT INTO moto_peca (moto_id, peca_id, custo, intervalo_km) VALUES (?,?,?,?)',
         [moto_id, peca_id, custo, intervalo_km]
 
     );
+   
     return resultado
+    }catch(err:unknown){
+        if(err instanceof Error && (err as any).code ==='ER_DUP_ENTRY'){
+            throw new AppError(409, 'Essa peça já está cadastrada nessa moto')
+        }
+        console.error(err)
+        throw  err
+    }
 }
 
 export async function buscarMotoPorId(moto_id: number){
