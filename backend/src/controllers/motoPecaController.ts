@@ -1,12 +1,19 @@
 import { Request, Response } from "express";
 import { buscarMotoPorId, criarMotoPeca, editarMotoPecas, listarMotoPecas } from "../models/motoPecaModel";
 
+import * as z from "zod"; 
+import { AppError } from "../Erros/AppError";
+
+const Peca = z.object({
+    peca_id: z.number({ error: "Peça inválida" }),
+    custo: z.number({ error: "Custo inválido" }).min(0.1, "Custo deve ser maior que zero"),
+    intervalo_km: z.number({ error: "Intervalo inválido" }).min(1, "Intervalo deve ser maior que zero")
+})
+
 export async function postMotoPeca(req:Request, res:Response){
-    
-    try{
         const usuario_id = req.usuario_id
         if (typeof usuario_id !== "number") {
-            return res.status(401).json({ error: "Usuário inválido" });
+            throw new AppError(400, "Usuário inválido")
         }
 
         const {motoId} = req.params
@@ -14,30 +21,25 @@ export async function postMotoPeca(req:Request, res:Response){
         
         const moto = await buscarMotoPorId(moto_id);
         if(moto === undefined){
-            return res.status(404).json({error: 'Moto não encontrada'})
+            throw new AppError(404, "Moto não encontrada")
         } 
 
         if(moto.usuario_id !== usuario_id){
-            return res.status(403).json({error:'Essa moto não é sua'})
+            throw new AppError(404, "Moto não encontrada")
         }
 
 
 
-        const {peca_id, custo, intervalo_km} = req.body
-         if(custo<=0 || intervalo_km<= 0 || !peca_id){
-        return res.status(400).json({error: "Dados inválidos"})
-    }
+        const body =  req.body
+        const bodyVerificado = await Peca.safeParseAsync(body)
+        if(!bodyVerificado.success){
+            throw new AppError(400, bodyVerificado.error.issues[0]?.message ?? "Dados inválidos")
+        }
 
+        const { peca_id, custo, intervalo_km } = bodyVerificado.data
         const resultado =await criarMotoPeca(moto_id, peca_id, custo, intervalo_km)
         res.status(201).json({message: 'Peça da moto cadastrada com sucesso', resultado})
-    }catch(err:unknown){
-        if(err instanceof Error && (err as any).code ==='ER_DUP_ENTRY'){
-            res.status(409).json({error: 'Essa peça já está cadastrada nessa moto'})
-        }
-
-        const message = err instanceof Error ? err.message : 'Erro desconhecido'
-         res.status(500).json({error: message})
-    }
+    
 }
 
 export async function getMotoPecas(req:Request, res:Response){
