@@ -92,9 +92,9 @@ function Corridas() {
       await apiFetch(`/motos/${moto_id}/corridas`, {
         method: "POST",
         body: JSON.stringify({
-          kms_rodados: kmsRodados,
-          receita: receita.replace(",", "."),
-          gasolina_congelada: gasolina.replace(",", "."),
+          kms_rodados: Number(kmsRodados),
+          receita: Number(receita.replace(",", ".")),
+          gasolina_congelada: Number(gasolina.replace(",", ".")),
           data,
         }),
       });

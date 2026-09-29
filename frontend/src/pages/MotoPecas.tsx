@@ -61,9 +61,9 @@ function MotoPecas() {
       await apiFetch(`/motos/${motoId}/pecas`, {
         method: "POST",
         body: JSON.stringify({
-          peca_id: pecaId,
-          custo,
-          intervalo_km: intervaloKm,
+          peca_id: Number(pecaId),
+          custo: Number(custo),
+          intervalo_km: Number(intervaloKm),
         }),
       });
       buscarPecas();
@@ -86,8 +86,8 @@ function MotoPecas() {
           await apiFetch(`/motos/${motoId}/pecas/${pecaEditando?.id}`, {
             method: "PATCH",
             body: JSON.stringify({
-              custo: custoPeca,
-              intervalo_km: intervaloKmPeca
+              custo: Number(custoPeca),
+              intervalo_km: Number(intervaloKmPeca)
             }),
           })
           mostrarToast('Peça atualizada com sucesso!', "ok")

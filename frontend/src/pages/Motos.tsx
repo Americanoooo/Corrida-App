@@ -55,7 +55,7 @@ function Motos() {
     try {
       await apiFetch("/motos", {
         method: "POST",
-        body: JSON.stringify({ modelo, km_litro }),
+        body: JSON.stringify({ modelo, km_litro: Number(km_litro) }),
       });
 
       buscarMotos();
@@ -79,7 +79,7 @@ function Motos() {
       
       await apiFetch(`/motos/${motoEditando?.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ modelo: modeloEditando, km_litro: kmLitroEditando }),
+        body: JSON.stringify({ modelo: modeloEditando, km_litro: Number(kmLitroEditando) }),
       });
       mostrarToast('Moto atualizada!', "ok")
       buscarMotos();
