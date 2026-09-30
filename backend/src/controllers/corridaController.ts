@@ -11,6 +11,11 @@ const Corrida = z.object({
     data: z.coerce.date({ error: "Data inválida" })
 })
 
+const Relatorio = z.object({
+    inicio: z.string("inicio e fim são obrigatórios (formato AAA-MM-DD)"),
+    fim: z.string("inicio e fim são obrigatórios (formato AAA-MM-DD")
+})
+
 export async function postCorrida(req: Request, res:Response){
 
        
@@ -56,22 +61,23 @@ export async function getCorridaId(req: Request, res:Response){
 
 export async function getRelatorio(req:Request, res:Response){
 
-    try{
-        const {inicio, fim} = req.query;
-        if(typeof inicio !=='string' || typeof fim !== 'string'){
-            return res.status(400).json({error: 'inicio e fim são obrigatórios (formato AAA-MM-DD'})
+   
+        const query= req.query;
+        const queryValidado = await Relatorio.safeParseAsync(query)
+        if(!queryValidado.success){
+            throw new AppError(400, queryValidado.error.issues[0]?.message ?? "inicio e fim são obrigatórios (formato AAA-MM-DD")
         }
+        const { inicio, fim} = queryValidado.data
+
+       
         const usuario_id = req.usuario_id
-        if(typeof usuario_id !== "number"){
-            return res.status(401).json({error: 'Usuário inválido'})
+        if(typeof usuario_id  !== "number"){
+            throw new AppError(401, "Usuário inválido")
         }
 
         const resultado = await relatorioPorPeriodo(usuario_id, inicio, fim)
         res.status(200).json({message: resultado})
-    }catch(err: unknown){
-        const message = err instanceof Error ? err.message: 'Erro desconhecido'
-        res.status(500).json({error: message})
-    }
+  
 }
 
 export async function getCorridas(req: Request, res:Response){

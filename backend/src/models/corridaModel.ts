@@ -2,6 +2,7 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../db";
 import { AppError } from "../Erros/AppError";
 import { calcularCustoCombustivel, calcularCustoKm } from "../calculos";
+import { error } from "node:console";
 
 export async function criarCorrida(
   usuario_id: number,
@@ -125,8 +126,11 @@ export async function relatorioPorPeriodo(
         WHERE corrida.usuario_id =? AND corrida.data BETWEEN ? AND ?`,
     [usuario_id, inicio, fim],
   );
-  if (linhas[0] === undefined) return;
-  const r = linhas[0];
+ //AVISO Caso algum dia essa query ganhe um GROUP BY corrida.id (por exemplo, pra detalhar por corrida em vez de somar tudo), r pode voltar a ser undefined sem nenhum aviso do compilador.
+  if(linhas[0] ===undefined){
+    throw new Error("Busca por corridas no banco falhou")
+  }
+ const r = linhas[0]
   const receitaTotal = Number(r.receita_total);
   const desgasteTotal = Number(r.desgaste_total);
   const combustivelTotal = Number(r.combustivel_total);
