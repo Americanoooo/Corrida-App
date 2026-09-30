@@ -73,7 +73,9 @@ export async function buscarCorridaPorId(
         WHERE corrida.id =? AND corrida.usuario_id =?`,
     [corrida_id, usuario_id],
   );
-  if (linhas[0] === undefined) return;
+  if (linhas[0] === undefined){
+    throw new AppError(404, "Corrida não encontrada.")
+  }
   const corrida = linhas[0];
   const km = Number(corrida.kms_rodados);
   const receita = Number(corrida.receita);

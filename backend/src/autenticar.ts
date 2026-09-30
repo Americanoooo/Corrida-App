@@ -24,6 +24,7 @@ export function autenticar(req: Request, res: Response, next: NextFunction){
         req.usuario_id = payload.usuario_id as number;
         next();
     }catch(err){
+    console.error(err)
     return res.status(401).json({message: 'Token inválido'})
 
     }

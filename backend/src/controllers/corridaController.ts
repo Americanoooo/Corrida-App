@@ -18,7 +18,7 @@ export async function postCorrida(req: Request, res:Response){
 
          if(typeof usuario_id  !== "number"){
         throw new AppError(401, "Usuário inválido")
-    }
+            }
 
         const {motoId} = req.params;
         const moto_id= Number(motoId)
@@ -39,21 +39,20 @@ export async function postCorrida(req: Request, res:Response){
 
 export async function getCorridaId(req: Request, res:Response){
     
-
-    try{
         const {corridaId} = req.params
         const corrida_id = Number(corridaId)
+
         const usuario_id = req.usuario_id
-        if(typeof usuario_id !== "number"){
-            return res.status(401).json({error: 'Usuário inválido'})
-        }
+         if(typeof usuario_id  !== "number"){
+        throw new AppError(401, "Usuário inválido")
+            }
+
         const resultado = await buscarCorridaPorId(corrida_id, usuario_id)
-        res.status(200).json({message: 'corrida deu certo em',resultado})
-    }catch(err:unknown){
-        const message = err instanceof Error ? err.message : 'Erro desconhecido'
-        res.status(500).json({error: message})
+     
+
+        res.status(200).json({resultado})
     }   
-}
+
 
 export async function getRelatorio(req:Request, res:Response){
 
