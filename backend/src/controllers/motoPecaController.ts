@@ -18,7 +18,7 @@ const PecaPatch = z.object({
 export async function postMotoPeca(req:Request, res:Response){
         const usuario_id = req.usuario_id
         if (typeof usuario_id !== "number") {
-            throw new AppError(400, "Usuário inválido")
+            throw new AppError(401, "Usuário inválido")
         }
 
         const {motoId} = req.params
@@ -47,7 +47,7 @@ export async function getMotoPecas(req:Request, res:Response){
      
     const usuario_id = req.usuario_id
     if(typeof usuario_id  !== "number"){
-        throw new AppError(400, "Usuário inválido")
+        throw new AppError(401, "Usuário inválido")
     }
 
     const {motoId} = req.params
@@ -68,7 +68,7 @@ export async function patchMotoPecas(req:Request, res:Response){
 
         const usuario_id = req.usuario_id
       if(typeof usuario_id  !== "number"){
-        throw new AppError(400, "Usuário inválido")
+        throw new AppError(401, "Usuário inválido")
     }
 
     const {motoId, pecaId} = req.params

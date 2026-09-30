@@ -9,7 +9,7 @@ export async function criarCorrida(
   kms_rodados: number,
   receita: number,
   gasolina_congelada: number,
-  data: number,
+  data: Date,
 ) {
   const conn = await pool.getConnection();
   try {
@@ -20,12 +20,12 @@ export async function criarCorrida(
       [moto_id],
     );
     const moto = motos[0];
-    if (moto === undefined) {
-      throw new Error("Moto não encontrada");
+    
+    if (moto === undefined || moto.usuario_id !== usuario_id) {
+      throw new AppError(404, "Moto não encontrada");
     }
-    if (moto.usuario_id !== usuario_id) {
-      throw new Error("Essa moto não é sua");
-    }
+   
+
     const km_litro_congelado = moto.km_litro
     const [pecas] = await conn.query<RowDataPacket[]>(
       "SELECT * FROM moto_peca WHERE moto_id = ? ",

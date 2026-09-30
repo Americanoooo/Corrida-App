@@ -2,26 +2,39 @@ import { Request, Response } from "express";
 import { buscarCorridaPorId, buscarTodasCorridas, criarCorrida, relatorioPorPeriodo } from "../models/corridaModel";
 import { AppError } from "../Erros/AppError";
 
-export async function postCorrida(req: Request, res:Response){
-    try{
-        const usuario_id = req.usuario_id
+import * as z from "zod"; 
 
-        if(typeof usuario_id !== "number"){
-            return res.status(401).json({error: 'Usuário inválido'})
-        }
+const Corrida = z.object({
+    kms_rodados: z.number({ error: "Quilometragem inválida" }).positive("Quilometragem deve ser maior que zero"),
+    receita: z.number({ error: "Receita inválida" }).positive("Receita deve ser maior que zero"),
+    gasolina_congelada: z.number({ error: "Valor de gasolina congelada inválido" }).positive("Valor de gasolina congelada deve ser maior que zero"),
+    data: z.coerce.date({ error: "Data inválida" })
+})
+
+export async function postCorrida(req: Request, res:Response){
+
+       
+    const usuario_id = req.usuario_id
+
+         if(typeof usuario_id  !== "number"){
+        throw new AppError(401, "Usuário inválido")
+    }
+
         const {motoId} = req.params;
         const moto_id= Number(motoId)
-        const {kms_rodados, receita, gasolina_congelada, data}= req.body;
+
+        const body = req.body
+        const corrida = await Corrida.safeParseAsync(body)
+        if(!corrida.success){
+            throw new AppError(400, corrida.error.issues[0]?.message ?? "Dados inválidos")
+        }
+        
+        const {kms_rodados, receita, gasolina_congelada, data}= corrida.data
 
         const resultado = await criarCorrida(usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data)
         res.status(201).json({message: "Corrida cadastrada com sucesso", resultado})
-    }catch(err:unknown){
-        if(err instanceof AppError) {
-            res.status(err.status).json({error: err.message})
-        }
-        console.error(err)
-        res.status(500).json({error: "Erro desconhecido"})
-    }
+  
+
 }
 
 export async function getCorridaId(req: Request, res:Response){

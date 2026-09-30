@@ -26,6 +26,7 @@ app.use('/corridas', corridaRoutes)
 app.use('/usuario', usuarioRoutes)
 
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
+    console.error(err)
     const message = err instanceof AppError ? err.message : "Erro, tente novamente";
     const status = err instanceof AppError ? err.status : 500
     return res.status(status).json({error: message});
