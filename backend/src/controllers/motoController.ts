@@ -40,7 +40,7 @@ export async function getMoto(req: Request, res: Response) {
   }
   const resultado = await listarMoto(usuario_id);
 
-  res.status(200).json({message: "lista "});
+  res.status(200).json({resultado});
 }
 
 export async function patchMoto(req: Request, res: Response) {
@@ -62,7 +62,7 @@ export async function patchMoto(req: Request, res: Response) {
 
   const { motoId } = req.params;
   const moto_id = Number(motoId);
-  const resultado = await editarMoto(usuario_id, modelo, km_litro, moto_id);
+   await editarMoto(usuario_id, modelo, km_litro, moto_id);
 
   res.status(200).json({ message: "Moto atualizada" });
 }
