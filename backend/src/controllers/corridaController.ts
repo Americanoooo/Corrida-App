@@ -46,7 +46,7 @@ export async function postCorrida(req: Request, res:Response){
         const {kms_rodados, receita, gasolina_congelada, data}= corrida.data
 
         const resultado = await criarCorrida(usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data)
-        res.status(201).json({resultado})
+        res.status(201).json({message: "Corrida criada com sucesso."})
   
 
 }
@@ -85,7 +85,7 @@ export async function getRelatorio(req:Request, res:Response){
         }
 
         const resultado = await relatorioPorPeriodo(usuario_id, inicio, fim)
-        res.status(200).json({message: resultado})
+        res.status(200).json({resultado})
   
 }
 

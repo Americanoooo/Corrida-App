@@ -163,6 +163,7 @@ if(inicio && fim){
 sql += ` ORDER BY corrida.data DESC`;
   
   const [linhas] = await pool.query<RowDataPacket[]>(sql, params);
+
   return linhas;
 }
 

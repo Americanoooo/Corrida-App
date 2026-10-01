@@ -1,10 +1,11 @@
 import { ResultSetHeader } from "mysql2";
 import pool from "../db";
+import { AppError } from "../Erros/AppError";
 
 
 export async function criarMoto(usuario_id: number, modelo:string, km_litro:number){
 
-    const [resultado] = await pool.query(
+    const [resultado] = await pool.query<ResultSetHeader>(
     "INSERT INTO moto (usuario_id, modelo, km_litro) VALUES (?,?,?)",
     [usuario_id, modelo, km_litro]
 );
@@ -25,5 +26,10 @@ export async function editarMoto(usuario_id:number,modelo:string, km_litro: numb
         'UPDATE moto SET modelo = ?, km_litro= ? WHERE id= ? AND usuario_id = ?',
         [modelo, km_litro, moto_id, usuario_id]
     )
+
+    if(resultado.affectedRows === 0){
+        throw new AppError(404, "Não foi possível editar a moto")
+    }
+
     return resultado
 }
