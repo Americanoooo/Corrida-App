@@ -128,7 +128,7 @@ export async function relatorioPorPeriodo(
   );
  //AVISO Caso algum dia essa query ganhe um GROUP BY corrida.id (por exemplo, pra detalhar por corrida em vez de somar tudo), r pode voltar a ser undefined sem nenhum aviso do compilador.
   if(linhas[0] ===undefined){
-    throw new Error("Busca por corridas no banco falhou")
+    throw new Error("Falha ao buscar corridas no banco")
   }
  const r = linhas[0]
   const receitaTotal = Number(r.receita_total);

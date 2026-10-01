@@ -82,23 +82,20 @@ export async function getRelatorio(req:Request, res:Response){
 
 export async function getCorridas(req: Request, res:Response){
     
-    try{
         const usuario_id = req.usuario_id
-        const {inicio, fim}=req.query
-
-        const inicioStr = typeof inicio === "string"?inicio :undefined
-        const fimStr = typeof fim ==="string"? fim : undefined
-
+       const query= req.query;
+        const queryValidado = await Relatorio.safeParseAsync(query)
+        if(!queryValidado.success){
+            throw new AppError(400, queryValidado.error.issues[0]?.message ?? "inicio e fim são obrigatórios (formato AAA-MM-DD")
+        }
+        const { inicio, fim} = queryValidado.data
     
-        if(typeof usuario_id !== "number"){
-            return res.status(401).json({error: 'Usuário inválido'})
+        if(typeof usuario_id  !== "number"){
+            throw new AppError(401, "Usuário inválido")
         }
 
-        const resultado = await buscarTodasCorridas(usuario_id, inicioStr, fimStr)
+        const resultado = await buscarTodasCorridas(usuario_id, inicio, fim)
         res.status(200).json(resultado)
-    }catch(err:unknown){
-        const message = err instanceof Error ? err.message : 'Erro desconhecido'
-        res.status(500).json({error: message})
-    }
+  
 }
 
