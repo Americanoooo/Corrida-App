@@ -12,8 +12,17 @@ const Corrida = z.object({
 })
 
 const Relatorio = z.object({
-    inicio: z.string("inicio e fim são obrigatórios (formato AAA-MM-DD)"),
-    fim: z.string("inicio e fim são obrigatórios (formato AAA-MM-DD")
+    inicio: z.iso.date("inicio e fim são obrigatórios (formato AAA-MM-DD)"),
+    fim: z.iso.date("inicio e fim são obrigatórios (formato AAA-MM-DD")
+})
+
+const FiltroCorridas = z.object({
+    inicio: z.iso.date("inicio inválido (formato AAAA-MM-DD)").optional(),
+    fim: z.iso.date("fim inválido (formato AAAA-MM-DD)").optional()
+}).refine(q => (q.inicio === undefined) === (q.fim === undefined), {
+    message: "Informe inicio e fim juntos"
+}).refine(q => !q.inicio || !q.fim || q.inicio <= q.fim, {
+    message: "data inválida, fim não pode ser anterior ao inicio"
 })
 
 export async function postCorrida(req: Request, res:Response){
@@ -84,7 +93,7 @@ export async function getCorridas(req: Request, res:Response){
     
         const usuario_id = req.usuario_id
        const query= req.query;
-        const queryValidado = await Relatorio.safeParseAsync(query)
+        const queryValidado = await FiltroCorridas.safeParseAsync(query)
         if(!queryValidado.success){
             throw new AppError(400, queryValidado.error.issues[0]?.message ?? "inicio e fim são obrigatórios (formato AAA-MM-DD")
         }
