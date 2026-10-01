@@ -46,7 +46,7 @@ export async function postCorrida(req: Request, res:Response){
         const {kms_rodados, receita, gasolina_congelada, data}= corrida.data
 
         const resultado = await criarCorrida(usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data)
-        res.status(201).json({message: "Corrida cadastrada com sucesso", resultado})
+        res.status(201).json({resultado})
   
 
 }
