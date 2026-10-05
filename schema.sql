@@ -24,7 +24,7 @@ CREATE TABLE moto (
 -- 2. Catálogo puro (só PK)
 CREATE TABLE peca (
   id    INT AUTO_INCREMENT PRIMARY KEY,
-  nome  VARCHAR(100) NOT NULL
+  nome  VARCHAR(100) NOT NULL UNIQUE
 );
 
 -- 3. Junção viva: custo/intervalo de cada peça por moto (usuário edita)
