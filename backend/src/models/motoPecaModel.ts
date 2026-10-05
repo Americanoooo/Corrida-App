@@ -2,6 +2,7 @@ import { RowDataPacket } from "mysql2";
 import { ResultSetHeader } from "mysql2";
 import pool from "../db";
 import { AppError } from "../Erros/AppError";
+import { duplicateError } from "../Erros/DuplicateError";
 
 
 
@@ -17,11 +18,8 @@ export async function criarMotoPeca(moto_id:number, peca_id: number, custo:numbe
    
     return resultado
     }catch(err:unknown){
-        if(err instanceof Error && (err as any).code ==='ER_DUP_ENTRY'){
-            throw new AppError(409, 'Essa peça já está cadastrada nessa moto')
-        }
-        console.error(err)
-        throw  err
+        duplicateError(err, 'Essa peça já está cadastrada nessa moto')
+
     }
 }
 
