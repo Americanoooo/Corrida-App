@@ -24,3 +24,11 @@ export async function buscarPorEmail(email:string){
    
     return resultado[0]
 }
+
+export async function verificarAdmin(usuario_id:number){
+    const [resultado] = await pool.query<RowDataPacket[]>(
+        'SELECT admin FROM usuario WHERE id = ?',
+        [usuario_id]
+    );
+    return resultado[0]?.admin ?? 0
+}
