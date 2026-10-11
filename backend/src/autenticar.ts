@@ -36,17 +36,17 @@ export async function autorizacaoAdmin(req: Request, res: Response, next: NextFu
 
             const usuario_id = req.usuario_id
             if(!usuario_id){
-                return res.status(401).json({message: 'Token não fornecido'})
+                return res.status(403).json({message: 'Token não fornecido'})
             }
 
             const verificar = await verificarAdmin(usuario_id)
             if(!verificar){
-                return res.status(401).json({message: "Não autorizado"})
+                return res.status(403).json({message: "Não autorizado"})
             }
             next();
             }catch(err){
                 console.error(err)
-                return res.status(401).json({message: 'Token inválido'})
+                return res.status(403).json({message: 'Token inválido'})
 
             }
 }
