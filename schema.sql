@@ -9,7 +9,8 @@ CREATE TABLE usuario (
   id          INT AUTO_INCREMENT PRIMARY KEY,
   nome        VARCHAR(100) NOT NULL,
   email       VARCHAR(255) NOT NULL UNIQUE,
-  senha_hash  VARCHAR(255) NOT NULL
+  senha_hash  VARCHAR(255) NOT NULL,
+  admin       BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 -- 1. Catálogo puro (só PK)
