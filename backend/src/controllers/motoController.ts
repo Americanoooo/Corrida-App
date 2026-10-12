@@ -40,7 +40,7 @@ export async function getMoto(req: Request, res: Response) {
   }
   const resultado = await listarMoto(usuario_id);
 
-  res.status(200).json({resultado});
+  res.status(200).json(resultado);
 }
 
 export async function patchMoto(req: Request, res: Response) {
