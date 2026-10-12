@@ -33,14 +33,16 @@ export async function criarCorrida(
       [moto_id],
     );
     
+      if (pecas.length === 0) {
+      throw new AppError(400, "Moto sem peças cadastradas");
+    }
+
     const [corrida] = await conn.query<ResultSetHeader>(
       "INSERT INTO corrida (usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data, km_litro_congelado) VALUES(?,?,?,?,?,?, ?)",
       [usuario_id, moto_id, kms_rodados, receita, gasolina_congelada, data, km_litro_congelado],
     );
 
-    if (pecas.length === 0) {
-      throw new AppError(400, "Moto sem peças cadastradas");
-    }
+  
 
     for (const peca of pecas) {
       const custoKm = calcularCustoKm(peca.custo, peca.intervalo_km);
