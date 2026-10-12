@@ -17,7 +17,7 @@ CREATE TABLE usuario (
 CREATE TABLE moto (
   id        INT AUTO_INCREMENT PRIMARY KEY,
   modelo    VARCHAR(100) NOT NULL,
-  km_litro  DECIMAL(5,2),
+  km_litro  km_litro DECIMAL(5,2) NOT NULL CHECK (km_litro > 0),
   usuario_id INT NOT NULL,
   FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
@@ -44,7 +44,7 @@ CREATE TABLE moto_peca (
 CREATE TABLE corrida (
   id                  INT AUTO_INCREMENT PRIMARY KEY,
   moto_id             INT NOT NULL,
-  usuario_id 		  INT NULL,
+  usuario_id 		      INT NOT NULL,
   kms_rodados         DECIMAL(5,2),
   receita             DECIMAL(10,2),
   gasolina_congelada  DECIMAL(5,2),
