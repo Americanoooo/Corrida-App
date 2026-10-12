@@ -64,3 +64,8 @@ CREATE TABLE corrida_peca (
   FOREIGN KEY (corrida_id) REFERENCES corrida(id),
   FOREIGN KEY (moto_peca_id) REFERENCES moto_peca(id)
 );
+
+CREATE TABLE migrations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(500) NOT NULL UNIQUE
+);
