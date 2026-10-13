@@ -43,7 +43,6 @@ export async function postUsuario(req: Request, res: Response) {
 
 
 export async function postLogin(req: Request, res: Response) {
-
     const body = req.body;
     const bodyValidado = await Login.safeParseAsync(body)
     if(!bodyValidado.success){
@@ -55,13 +54,15 @@ export async function postLogin(req: Request, res: Response) {
 
     const usuario = await buscarPorEmail(email);
 
-     if(usuario === undefined){
-        throw new AppError(401, "Email ou senha inválidos")
-    }
+    const hashFalso = "$2a$10$ppjalVbAoi23/qV2kGvM1.7PRtGe0UF6cYLoCHv34a5saUPs4oJLS"
+   
 
-    const confere = await bcrypt.compare(senha, usuario.senha_hash);
+    const senhaHasheada = usuario === undefined ? hashFalso : usuario.senha_hash
+    const confere = await bcrypt.compare(senha, senhaHasheada);
 
-    if (!confere) {
+ 
+    
+    if (!confere || usuario === undefined) {
       throw new AppError(401, "Email ou senha inválidos")
     }
 
