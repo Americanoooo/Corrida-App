@@ -8,7 +8,6 @@ import corridaRoutes from './routes/corridaRoutes';
 import usuarioRoutes from './routes/usuarioRoutes';
 import { getHealth } from "./health";
 import { AppError } from "./Erros/AppError";
-import { autenticar } from "./autenticar";
 
 
 dotenv.config();
