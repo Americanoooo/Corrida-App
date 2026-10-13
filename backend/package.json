@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --exec tsx src/server.ts",
+    "migrate": "tsx src/migrations/construtor.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "jest"
+    "test": "jest",
+    "migrate:prod": "dotenv -e .env.production -- tsx src/migrations/construtor.ts"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +22,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.22.6",
+    "umzug": "^3.8.3",
     "zod": "^4.6.5"
   },
   "devDependencies": {
@@ -29,6 +32,7 @@
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.1.1",
+    "dotenv-cli": "^11.0.0",
     "jest": "^30.4.2",
     "nodemon": "^3.1.14",
     "ts-jest": "^29.4.12",
