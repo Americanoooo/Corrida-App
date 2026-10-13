@@ -2,6 +2,8 @@ import { RowDataPacket } from "mysql2";
 import pool from "../db";
 import { duplicateError } from "../Erros/DuplicateError";
 
+
+
 export async function criarUsuario( nome:string, email:string, senhaHash:string){
     
     try{
@@ -21,7 +23,8 @@ export async function buscarPorEmail(email:string){
         'SELECT * FROM usuario WHERE email = ?',
         [email]
     );
-   
+    
+    
     return resultado[0]
 }
 
