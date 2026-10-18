@@ -5,7 +5,7 @@ import { AppError } from "../Erros/AppError";
 import * as z from "zod";
 
 const Moto = z.object({
-  modelo: z.string({ error: "Modelo inválido" }),
+  modelo: z.string().trim().min(1, { error: "Modelo inválido" }),
   km_litro: z
     .number({ error: "Km / L inválido" })
     .positive({ error: "Km / L deve ser positivo" }),
@@ -30,7 +30,7 @@ export async function postMoto(req: Request, res: Response) {
   const { modelo, km_litro } = bodyValidado.data;
 
   const resultado = await criarMoto(usuario_id, modelo, km_litro);
-  res.status(201).json({ message: "Moto criada", id: resultado.insertId } );
+  res.status(201).json({ message: "Moto criada"});
 }
 
 export async function getMoto(req: Request, res: Response) {
@@ -40,7 +40,7 @@ export async function getMoto(req: Request, res: Response) {
   }
   const resultado = await listarMoto(usuario_id);
 
-  res.status(200).json(resultado);
+  res.status(200).json({ data: resultado });
 }
 
 export async function patchMoto(req: Request, res: Response) {

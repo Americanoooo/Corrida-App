@@ -43,7 +43,7 @@ function Motos() {
   async function buscarMotos() {
     try {
       const data = await apiFetch("/motos");
-      setMotos(data);
+      setMotos(data.data);
     } catch (err: unknown) {
           if(err instanceof ApiError && err.status < 500){
             mostrarToast(err.message, "erro");

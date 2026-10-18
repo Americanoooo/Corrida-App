@@ -5,7 +5,7 @@ import { AppError } from "../Erros/AppError";
 import * as z from "zod"; 
 
 const Corrida = z.object({
-    kms_rodados: z.number({ error: "Quilometragem inválida" }).positive("Quilometragem deve ser maior que zero"),
+    kms_rodados: z.number({ error: "Quilometragem inválida" }).positive("Quilometragem deve ser maior que zero").max(999.99, "A quilometragem máxima por corrida é 999."),
     receita: z.number({ error: "Receita inválida" }).positive("Receita deve ser maior que zero"),
     gasolina_congelada: z.number({ error: "Valor de gasolina congelada inválido" }).positive("Valor de gasolina congelada deve ser maior que zero"),
     data: z.coerce.date({ error: "Data inválida" })
@@ -62,10 +62,10 @@ export async function getCorridaId(req: Request, res:Response){
             }
 
         const resultado = await buscarCorridaPorId(corrida_id, usuario_id)
-     
 
-        res.status(200).json({resultado})
-    }   
+
+        res.status(200).json({ data: resultado })
+    }
 
 
 export async function getRelatorio(req:Request, res:Response){
@@ -85,8 +85,8 @@ export async function getRelatorio(req:Request, res:Response){
         }
 
         const resultado = await relatorioPorPeriodo(usuario_id, inicio, fim)
-        res.status(200).json({resultado})
-  
+        res.status(200).json({ data: resultado })
+
 }
 
 export async function getCorridas(req: Request, res:Response){
@@ -104,7 +104,7 @@ export async function getCorridas(req: Request, res:Response){
         }
 
         const resultado = await buscarTodasCorridas(usuario_id, inicio, fim)
-        res.status(200).json(resultado)
-  
+        res.status(200).json({ data: resultado })
+
 }
 

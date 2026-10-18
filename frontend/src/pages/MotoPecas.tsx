@@ -54,7 +54,7 @@ function MotoPecas() {
   async function buscarPecas() {
     try {
       const data = await apiFetch(`/motos/${motoId}/pecas`);
-      setPecas(data);
+      setPecas(data.data);
     } catch (err: unknown) {
       if(err instanceof ApiError && err.status < 500){
         mostrarToast(err.message, "erro");
@@ -119,7 +119,7 @@ function MotoPecas() {
     async function buscarCatalogo() {
       try {
         const data = await apiFetch("/pecas");
-        setCatalogo(data);
+        setCatalogo(data.data);
       } catch (err: unknown) {
       if(err instanceof ApiError && err.status < 500){
         mostrarToast(err.message, "erro");

@@ -36,7 +36,7 @@ export async function postUsuario(req: Request, res: Response) {
 
     const senhaHash = await bcrypt.hash(senha, 10);
 
-    const resultado = await criarUsuario(nome, email, senhaHash);
+     await criarUsuario(nome, email, senhaHash);
     res.status(201).json({ message: "Usuário cadastrado com sucesso" });
   
 }
@@ -69,5 +69,5 @@ export async function postLogin(req: Request, res: Response) {
     const token = jwt.sign({ usuario_id: usuario.id }, JWT_SECRET as string, {
       expiresIn: "24h",
     });
-    res.json({ token });
+    res.json({ data: { token } });
 }

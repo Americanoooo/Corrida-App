@@ -21,7 +21,7 @@ function Login() {
         body: JSON.stringify({ email, senha }),
       });
 
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("token", data.data.token);
       navigate("/motos");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Email ou senha inválidos";

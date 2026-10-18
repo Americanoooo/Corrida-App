@@ -98,7 +98,7 @@ function Corridas() {
     async function buscarMotos() {
       try {
         const todasMotos = await apiFetch(`/motos`);
-        setMotos(todasMotos);
+        setMotos(todasMotos.data);
       } catch (err: unknown) {
       if(err instanceof ApiError && err.status < 500){
         mostrarToast(err.message, "erro");
@@ -118,7 +118,7 @@ function Corridas() {
       }
 
       const data = await apiFetch(url);
-      setCorridas(data);
+      setCorridas(data.data);
     }catch (err: unknown) {
       if(err instanceof ApiError && err.status < 500){
         mostrarToast(err.message, "erro");

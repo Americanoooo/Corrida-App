@@ -56,7 +56,7 @@ export async function postMotoPeca(req: Request, res: Response) {
   const resultado = await criarMotoPeca(moto_id, peca_id, custo, intervalo_km);
   return res
     .status(201)
-    .json({ message: "Peça da moto cadastrada com sucesso", resultado });
+    .json({ message: "Peça da moto cadastrada com sucesso", data: resultado });
 }
 
 export async function getMotoPecas(req: Request, res: Response) {
@@ -75,7 +75,7 @@ export async function getMotoPecas(req: Request, res: Response) {
 
   const resultado = await listarMotoPecas(moto_id, usuario_id);
 
-  return res.status(200).json(resultado);
+  return res.status(200).json({ data: resultado });
 }
 
 export async function patchMotoPecas(req: Request, res: Response) {

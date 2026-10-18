@@ -20,11 +20,11 @@ export async function postPeca(req: Request, res: Response) {
 
     const nome = bodyValidado.data.nome;
 
-    const resultado = await criarPeca(nome);
+     await criarPeca(nome);
     res.status(201).json({ message: "Peça cadastrada com sucesso"});
 }
 
 export async function getPeca(req: Request, res: Response) {
     const resultado = await listarPecas();
-    res.status(200).json(resultado);
+    res.status(200).json({ data: resultado });
 }
