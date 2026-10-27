@@ -2,6 +2,11 @@ import { RowDataPacket } from "mysql2";
 import pool from "../db";
 import { duplicateError } from "../Erros/DuplicateError";
 
+
+interface Admin extends RowDataPacket{
+    admin: number
+}
+
 export async function criarUsuario( nome:string, email:string, senhaHash:string){
     
     try{
@@ -21,14 +26,15 @@ export async function buscarPorEmail(email:string){
         'SELECT * FROM usuario WHERE email = ?',
         [email]
     );
-   
+    
+    
     return resultado[0]
 }
 
 export async function verificarAdmin(usuario_id:number){
-    const [resultado] = await pool.query<RowDataPacket[]>(
+    const [resultado] = await pool.query<Admin[]>(
         'SELECT admin FROM usuario WHERE id = ?',
         [usuario_id]
     );
     return resultado[0]?.admin ?? 0
-}
+}   

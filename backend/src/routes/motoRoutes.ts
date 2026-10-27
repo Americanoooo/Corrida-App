@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { getMoto, patchMoto, postMoto } from "../controllers/motoController";
-import { getMotoPecas, patchMotoPecas, postMotoPeca } from "../controllers/motoPecaController";
+import { deletarMotoPecas, getMotoPecas, patchMotoPecas, postMotoPeca } from "../controllers/motoPecaController";
 import { getCorridaId, postCorrida } from "../controllers/corridaController";
 import { autenticar } from "../autenticar";
 
@@ -13,6 +13,8 @@ router.get('/:motoId/pecas', autenticar, getMotoPecas)
 router.post('/:motoId/corridas', autenticar, postCorrida)
 router.patch('/:motoId', autenticar, patchMoto)
 router.patch('/:motoId/pecas/:pecaId', autenticar, patchMotoPecas)
+router.delete('/:motoId/pecas/:pecaId', autenticar, deletarMotoPecas)
+
 
 
 export default router

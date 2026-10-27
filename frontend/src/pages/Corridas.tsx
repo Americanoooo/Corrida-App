@@ -3,6 +3,15 @@ import { apiFetch } from "../api";
 import { formatarMoeda } from "../utils/FormatarMoeda";
 import { ApiError } from "../Erros/ApiError";
 import { useToast } from "../context/ToastContext";
+import PageHeader from "../components/ui/PageHeader";
+import HeroMetric from "../components/ui/HeroMetric";
+import Faixa from "../components/ui/Faixa";
+import Fab from "../components/ui/Fab";
+import Modal from "../components/ui/Modal";
+import Button from "../components/ui/Button";
+import EmptyState from "../components/ui/EmptyState";
+import GrupoDoDia from "../components/corridas/GrupoDoDia";
+import { IconTrendUp, IconTrendDown, IconPlus, IconFilter, IconRoute } from "../components/ui/icons";
 
 interface Moto {
   id: number;
@@ -16,6 +25,43 @@ interface Corrida {
   receita: number;
   lucro_real: number;
   data: number;
+}
+
+// Agrupamento por dia é só apresentação — mesmo tipo de soma que já existia
+// pra totalLucro, só organizada por chave de data em vez de uma soma só.
+function rotuloDoDia(dataFormatada: string) {
+  const hoje = new Date().toLocaleDateString("pt-BR");
+  const ontem = new Date(Date.now() - 86400000).toLocaleDateString("pt-BR");
+  if (dataFormatada === hoje) return "Hoje";
+  if (dataFormatada === ontem) return "Ontem";
+  return dataFormatada;
+}
+
+function agruparPorDia(corridas: Corrida[]) {
+  const grupos = new Map<string, Corrida[]>();
+  for (const c of corridas) {
+    const chave = new Date(c.data).toLocaleDateString("pt-BR");
+    if (!grupos.has(chave)) grupos.set(chave, []);
+    grupos.get(chave)!.push(c);
+  }
+  return Array.from(grupos.entries()).map(([dataFormatada, itens]) => ({
+    dataFormatada,
+    rotulo: rotuloDoDia(dataFormatada),
+    itens,
+    lucroDia: itens.reduce((ac, c) => ac + Number(c.lucro_real), 0),
+  }));
+}
+
+function FiltroChip({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 min-h-10 px-3.5 rounded-full border border-faixa-borda bg-white/5 text-sm font-medium text-faixa-texto hover:bg-white/10 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-faixa"
+    >
+      <IconFilter className="h-4 w-4" />
+      Filtrar
+    </button>
+  );
 }
 
 function Corridas() {
@@ -34,18 +80,25 @@ function Corridas() {
   const [carregando, setCarregando]=useState(true)
   const mostrarToast = useToast()
 
+  // Estado só de UI — abrir/fechar os sheets. Não afeta busca nem cadastro.
+  const [formAberto, setFormAberto] = useState(false);
+  const [filtroAberto, setFiltroAberto] = useState(false);
+
 
     const corridasFiltradas = motoCorridaFiltro
     ? corridas.filter((c)=> c.modelo ===motoCorridaFiltro)
     :corridas
 
   const totalLucro = corridasFiltradas.reduce((ac, c) => ac + Number(c.lucro_real), 0);
+  const totalReceita = corridasFiltradas.reduce((ac, c) => ac + Number(c.receita), 0);
+  const totalKm = corridasFiltradas.reduce((ac, c) => ac + Number(c.kms_rodados), 0);
+  const gruposDoDia = agruparPorDia(corridasFiltradas);
 
   useEffect(() => {
     async function buscarMotos() {
       try {
         const todasMotos = await apiFetch(`/motos`);
-        setMotos(todasMotos);
+        setMotos(todasMotos.data);
       } catch (err: unknown) {
       if(err instanceof ApiError && err.status < 500){
         mostrarToast(err.message, "erro");
@@ -65,7 +118,7 @@ function Corridas() {
       }
 
       const data = await apiFetch(url);
-      setCorridas(data);
+      setCorridas(data.data);
     }catch (err: unknown) {
       if(err instanceof ApiError && err.status < 500){
         mostrarToast(err.message, "erro");
@@ -107,7 +160,7 @@ function Corridas() {
         setErro('Nenhuma peça cadastrada')
       }
       const message =
-        err instanceof Error ? err.message : "Erro ao cadastrar corridas";
+        err instanceof ApiError && err.status < 500 ? err.message : "Erro ao cadastrar corridas";
 mostrarToast(message, "erro")
     }
     buscarCorridas();
@@ -139,190 +192,227 @@ setFim(hoje);
   }
 
   return (
-    <div className="max-w-5xl mx-auto flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Corridas</h1>
-        <p className="text-slate-500 mt-1">Registre corridas e acompanhe seu lucro</p>
-      </div>
-
-      <div className="card p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-5">
-          <h2 className="text-lg font-semibold text-slate-900">Cadastrar nova corrida</h2>
-          <select
-            className="select-field sm:w-56"
-            value={moto_id}
-            onChange={(e) => setMotoId(e.target.value)}
-          >
-            <option value={""}>Escolha uma moto</option>
-            {motos.map((moto) => (
-              <option key={moto.id} value={moto.id}>
-                {moto.modelo}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <input
-            className="input-field"
-            placeholder="Kms Rodados"
-            type="number"
-            value={kmsRodados}
-            onChange={(e) => setKmsRodados(e.target.value)}
-          />
-          <input
-            className="input-field"
-            placeholder="Receita"
-            type="number"
-            value={receita}
-            onChange={(e) => setReceita(e.target.value)}
-          />
-          <input
-            className="input-field"
-            placeholder="Preço da gasolina"
-            type="number"
-            value={gasolina}
-            onChange={(e) => setGasolina(e.target.value)}
-          />
-        </div>
-
-        <input
-          className="input-field mt-4 sm:w-52"
-          type="date"
-          value={data}
-          max={hoje}
-          onChange={(e) => setData(e.target.value)}
+    <>
+      <Faixa>
+        <PageHeader
+          titulo="Corridas"
+          tom="claro"
+          acao={<FiltroChip onClick={() => setFiltroAberto(true)} />}
         />
 
-        
-
-        <button
-          className="btn-primary mt-5 mx-auto w-full sm:w-auto sm:px-10"
-          onClick={handleRegistrar}
-        >
-          Cadastrar
-        </button>
-        {erro && (
-          <p className="text-sm text-red-600 text-center mt-4">{erro}</p>
-        )}
-      </div>
-
-      <div className="card p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <h2 className="text-lg font-semibold text-slate-900">
-            Corridas realizadas
-          </h2>
-
-          <select
-            className="select-field sm:w-56"
-            value={motoCorridaFiltro}
-            onChange={(e) => setMotoCorridaFiltro(e.target.value)}
-          >
-            <option value="">Todas as motos</option>
-            {motos.map((moto) => (
-              <option key={moto.id} value={moto.modelo}>
-                {moto.modelo}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-5 pt-5 border-t border-slate-100">
-
-          <div className="flex flex-wrap gap-2 items-center">
-
-            <span className="text-sm font-medium text-slate-500 mr-1">Filtrar:</span>
-
-            <button
-              className="btn-secondary px-3! py-1.5! text-sm"
-              onClick={filtrarHoje}
-            >
-              Hoje
-            </button>
-            <button
-            onClick={filtrarSemana}
-            className="btn-secondary px-3! py-1.5! text-sm">
-              Semana
-            </button>
-            <button
-            onClick={filtrarMes}
-            className="btn-secondary px-3! py-1.5! text-sm">
-              Mês
-            </button>
+        <div className="flex flex-col items-center gap-3">
+          <HeroMetric
+            label="Lucro no período"
+            value={formatarMoeda(totalLucro)}
+            selo={{
+              tom: totalLucro >= 0 ? "lucro" : "prejuizo",
+              conteudo: (
+                <>
+                  {totalLucro >= 0 ? (
+                    <IconTrendUp className="h-3.5 w-3.5" />
+                  ) : (
+                    <IconTrendDown className="h-3.5 w-3.5" />
+                  )}
+                  {totalLucro >= 0 ? "No positivo" : "No negativo"} ·{" "}
+                  {corridasFiltradas.length} corrida{corridasFiltradas.length === 1 ? "" : "s"}
+                </>
+              ),
+            }}
+          />
+          <div className="grid grid-cols-2 gap-4 w-full max-w-xs pt-4 border-t border-faixa-borda/40">
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-xs text-faixa-texto-secundario">Receita</span>
+              <span className="text-base font-semibold text-faixa-texto tabular-nums">
+                {formatarMoeda(totalReceita)}
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-0.5">
+              <span className="text-xs text-faixa-texto-secundario">Km rodados</span>
+              <span className="text-base font-semibold text-faixa-texto tabular-nums">{totalKm} km</span>
+            </div>
           </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="font-medium text-slate-500">Início:</span>
-            <input
-              className="input-field py-1.5! w-auto!"
-              type="date"
-              value={inicio}
-              onChange={(e) => setInicio(e.target.value)}
-            />
-            <span className="font-medium text-slate-500">Fim:</span>
-            <input
-              className="input-field py-1.5! w-auto!"
-              type="date"
-              value={fim}
-              onChange={(e) => setFim(e.target.value)}
-            />
-          </div>
-
-
         </div>
-        
-         
+      </Faixa>
 
-        <div className="flex flex-col mt-4 max-h-120 overflow-y-auto">
-          {carregando ?(
-            <p className="text-slate-500 text-center py-10">Carregando...</p>
-          ) : corridasFiltradas.length ===0 ?(
-            <p className="text-slate-500 text-center py-10">Nenhuma corrida encontrada</p>
-            )
-            : (
-            <>
-              <div className="hidden sm:grid sm:grid-cols-5 gap-4 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-400 border-b border-slate-100">
-                <span>Moto</span>
-                <span>Data</span>
-                <span>Kms rodados</span>
-                <span>Receita</span>
-                <span className="text-right">Lucro</span>
-              </div>
-              {corridasFiltradas.map((c) => (
-              <div key={c.id} className="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-1 px-3 py-3 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition duration-150 text-sm">
-                <span className="text-slate-800 font-medium">{c.modelo}</span>
-                <span className="text-slate-500">{new Date(c.data).toLocaleDateString("pt-BR")}</span>
-                <span className="text-slate-500">{c.kms_rodados} Km</span>
-                <span className="text-slate-500">{formatarMoeda(c.receita)}</span>
-                <span className={`sm:text-right font-semibold ${Number(c.lucro_real) >= 0 ? "text-green-600" : "text-red-600"}`}>
-                  {formatarMoeda(c.lucro_real)}
-                </span>
-              </div>
-            ))}
-            </>
-          )}
-
-        </div>
-
-
+      <div className="max-w-5xl mx-auto flex flex-col gap-6 mt-3">
+      <div className="flex flex-col gap-4">
         {carregando ? (
-          <>
-          </>
-        ) : corridas.length ===0 ? (
-          <>
-          </>
-        ):(
-        <div className="flex items-center justify-end gap-2 mt-4 pt-5 border-t border-slate-200">
-          <span className="text-slate-500 font-medium">Lucro total:</span>
-          <span className={`text-xl font-bold ${totalLucro >= 0 ? "text-green-600" : "text-red-600"}`}>
-            {formatarMoeda(totalLucro)}
-          </span>
-        </div>
+          <div className="flex flex-col gap-3 motion-safe:animate-pulse">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="h-24 rounded-card bg-slate-100" />
+            ))}
+          </div>
+        ) : gruposDoDia.length === 0 ? (
+          <EmptyState
+            icon={<IconRoute className="h-6 w-6" />}
+            titulo="Nenhuma corrida por aqui ainda"
+            descricao="Toque no + e cadastre sua primeira corrida pra acompanhar o lucro em tempo real."
+          />
+        ) : (
+          gruposDoDia.map((grupo) => (
+            <GrupoDoDia key={grupo.dataFormatada} rotulo={grupo.rotulo} lucroDia={grupo.lucroDia} corridas={grupo.itens} />
+          ))
         )}
-
       </div>
-    </div>
+
+      <Fab aria-label="Registrar corrida" onClick={() => setFormAberto(true)}>
+        <IconPlus className="h-6 w-6" />
+      </Fab>
+
+      <Modal aberto={formAberto} titulo="Registrar corrida" onFechar={() => setFormAberto(false)}>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="moto-corrida" className="text-sm font-medium text-texto-secundario">Moto</label>
+            <select
+              id="moto-corrida"
+              className="select-field"
+              value={moto_id}
+              onChange={(e) => setMotoId(e.target.value)}
+            >
+              <option value={""}>Escolha uma moto</option>
+              {motos.map((moto) => (
+                <option key={moto.id} value={moto.id}>
+                  {moto.modelo}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="kms-rodados" className="text-sm font-medium text-texto-secundario">Km rodados</label>
+              <input
+                id="kms-rodados"
+                className="input-field"
+                placeholder="Ex: 120"
+                type="number"
+                inputMode="decimal"
+                value={kmsRodados}
+                onChange={(e) => setKmsRodados(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="receita" className="text-sm font-medium text-texto-secundario">Receita</label>
+              <input
+                id="receita"
+                className="input-field"
+                placeholder="Ex: 85,00"
+                type="number"
+                inputMode="decimal"
+                value={receita}
+                onChange={(e) => setReceita(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="gasolina" className="text-sm font-medium text-texto-secundario">Preço da gasolina</label>
+              <input
+                id="gasolina"
+                className="input-field"
+                placeholder="Ex: 5,89"
+                type="number"
+                inputMode="decimal"
+                value={gasolina}
+                onChange={(e) => setGasolina(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1.5 sm:w-52">
+            <label htmlFor="data-corrida" className="text-sm font-medium text-texto-secundario">Data</label>
+            <input
+              id="data-corrida"
+              className="input-field"
+              type="date"
+              value={data}
+              max={hoje}
+              onChange={(e) => setData(e.target.value)}
+            />
+          </div>
+
+          {erro && <p className="text-sm text-erro text-center">{erro}</p>}
+
+          <Button variant="primary" className="w-full" onClick={handleRegistrar}>
+            Cadastrar
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal aberto={filtroAberto} titulo="Filtrar corridas" onFechar={() => setFiltroAberto(false)}>
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="moto-filtro" className="text-sm font-medium text-texto-secundario">Moto</label>
+            <select
+              id="moto-filtro"
+              className="select-field"
+              value={motoCorridaFiltro}
+              onChange={(e) => setMotoCorridaFiltro(e.target.value)}
+            >
+              <option value="">Todas as motos</option>
+              {motos.map((moto) => (
+                <option key={moto.id} value={moto.modelo}>
+                  {moto.modelo}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium text-texto-secundario">Período rápido</span>
+            <div className="flex gap-2">
+              <Button
+                variant="secondary"
+                className="flex-1 rounded-full!"
+                onClick={() => { filtrarHoje(); setFiltroAberto(false); }}
+              >
+                Hoje
+              </Button>
+              <Button
+                variant="secondary"
+                className="flex-1 rounded-full!"
+                onClick={() => { filtrarSemana(); setFiltroAberto(false); }}
+              >
+                Semana
+              </Button>
+              <Button
+                variant="secondary"
+                className="flex-1 rounded-full!"
+                onClick={() => { filtrarMes(); setFiltroAberto(false); }}
+              >
+                Mês
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="data-inicio" className="text-sm font-medium text-texto-secundario">Início</label>
+              <input
+                id="data-inicio"
+                className="input-field"
+                type="date"
+                value={inicio}
+                onChange={(e) => setInicio(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="data-fim" className="text-sm font-medium text-texto-secundario">Fim</label>
+              <input
+                id="data-fim"
+                className="input-field"
+                type="date"
+                value={fim}
+                onChange={(e) => setFim(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <Button variant="secondary" onClick={() => setFiltroAberto(false)}>
+            Fechar
+          </Button>
+        </div>
+      </Modal>
+      </div>
+    </>
   );
 }
 export default Corridas;

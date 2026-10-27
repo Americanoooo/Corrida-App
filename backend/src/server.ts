@@ -24,14 +24,18 @@ app.use('/pecas', pecaRoutes)
 app.use('/corridas', corridaRoutes)
 app.use('/usuario', usuarioRoutes)
 
+app.use((_req, res) => {
+    res.status(404).json({ message: "Rota não encontrada" });
+});
+
 const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     console.error(err)
     const message = err instanceof AppError ? err.message : "Erro, tente novamente";
-    const status = err instanceof AppError ? err.status : 500
-    return res.status(status).json({error: message});
+    const status = err instanceof AppError ? err.status : err instanceof SyntaxError ? 400 : 500
+    return res.status(status).json({ message });
 };
 
-app.use('/', errorHandler);
+app.use(errorHandler);
 
 const PORT = Number(process.env.PORT) || 3000;
 

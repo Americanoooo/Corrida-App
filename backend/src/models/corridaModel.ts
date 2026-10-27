@@ -29,7 +29,7 @@ export async function criarCorrida(
 
     const km_litro_congelado = moto.km_litro
     const [pecas] = await conn.query<RowDataPacket[]>(
-      "SELECT * FROM moto_peca WHERE moto_id = ? ",
+      "SELECT * FROM moto_peca WHERE moto_id = ?  AND ativo = TRUE",
       [moto_id],
     );
     
