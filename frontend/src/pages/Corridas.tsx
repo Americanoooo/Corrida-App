@@ -160,7 +160,7 @@ function Corridas() {
         setErro('Nenhuma peça cadastrada')
       }
       const message =
-        err instanceof Error ? err.message : "Erro ao cadastrar corridas";
+        err instanceof ApiError && err.status < 500 ? err.message : "Erro ao cadastrar corridas";
 mostrarToast(message, "erro")
     }
     buscarCorridas();

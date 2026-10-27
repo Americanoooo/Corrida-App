@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
+import { ApiError } from "../Erros/ApiError";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { IconUser, IconMail, IconLock, IconEye, IconEyeOff, IconAlertCircle } from "../components/ui/icons";
@@ -24,7 +25,7 @@ function Login() {
       localStorage.setItem("token", data.data.token);
       navigate("/motos");
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Email ou senha inválidos";
+      const msg = err instanceof ApiError && err.status < 500 ? err.message : "Email ou senha inválidos";
 
       setMensagem(msg);
     }
@@ -40,7 +41,7 @@ function Login() {
         });
         await handleLogin(email, senha);
     }catch(err){
-        const msg = err instanceof Error ? err.message : 'Erro ao cadastrar'
+        const msg = err instanceof ApiError && err.status < 500 ? err.message : 'Erro ao cadastrar'
         setMensagem(msg)
     }
   }
