@@ -118,7 +118,7 @@ function Motos() {
         <PageHeader titulo="Motos" descricao="Cadastre e gerencie suas motos" tom="claro" />
       </Faixa>
 
-      <div className="max-w-5xl mx-auto flex flex-col gap-6">
+      <div className="max-w-5xl mx-auto flex flex-col gap-6 mt-3">
       {carregando ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 motion-safe:animate-pulse">
           {[0, 1].map((i) => (
@@ -154,13 +154,13 @@ function Motos() {
                 <div className="flex sm:opacity-0 sm:group-hover:opacity-100 transition-opacity gap-2 shrink-0">
                   <Link
                     to={`/motos/${moto.id}/pecas`}
-                    className="flex items-center gap-1.5 min-h-12 px-3 rounded-controle text-sm font-medium text-texto-secundario bg-slate-100 hover:bg-slate-200 active:scale-95 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
+                    className="flex items-center gap-1.5 min-h-12 px-3 rounded-controle text-sm font-medium text-marca bg-marca/10 hover:bg-marca/20 active:bg-marca/25 active:scale-95 transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
                   >
                     <IconWrench className="h-4 w-4" />
                     Peças
                   </Link>
                   <button
-                    className="flex items-center gap-1.5 min-h-12 px-3 rounded-controle text-sm font-medium text-texto-secundario bg-slate-100 hover:bg-slate-200 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
+                    className="flex items-center gap-1.5 min-h-12 px-3 rounded-controle text-sm font-medium text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
                     onClick={() => setMotoEditando(moto)}
                   >
                     Editar

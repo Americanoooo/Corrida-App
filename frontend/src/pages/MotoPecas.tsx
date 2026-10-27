@@ -189,7 +189,7 @@ function MotoPecas() {
                 )}
               </p>
                 <button
-                    className="flex items-center justify-self-start sm:justify-self-end min-h-12 px-3 rounded-controle text-sm font-medium text-texto-secundario bg-slate-100 hover:bg-slate-200 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
+                    className="flex items-center justify-self-start sm:justify-self-end min-h-12 px-3 rounded-controle text-sm font-medium text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
                     onClick={()=> setPecaEditando(peca)}
                   >
                     Editar
