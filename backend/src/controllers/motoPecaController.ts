@@ -53,7 +53,16 @@ export async function postMotoPeca(req: Request, res: Response) {
   }
 
   const { peca_id, custo, intervalo_km } = bodyVerificado.data;
-  const resultado = await criarMotoPeca(moto_id, peca_id, custo, intervalo_km);
+  const resultado = await criarMotoPeca(
+    moto_id,
+    peca_id,
+    custo,
+    intervalo_km,
+    usuario_id,
+  );
+  if (resultado.affectedRows === 0) {
+    throw new AppError(404, "Não foi possível criar a peça");
+  }
   return res
     .status(201)
     .json({ message: "Peça da moto cadastrada com sucesso", data: resultado });
@@ -118,8 +127,6 @@ export async function patchMotoPecas(req: Request, res: Response) {
   return res.status(200).json({ message: "Peça atualizada!" });
 }
 
-
-
 export async function deletarMotoPecas(req: Request, res: Response) {
   const usuario_id = req.usuario_id;
   if (typeof usuario_id !== "number") {
@@ -134,12 +141,7 @@ export async function deletarMotoPecas(req: Request, res: Response) {
   if (moto === undefined || moto.usuario_id !== usuario_id) {
     throw new AppError(404, "Moto não encontrada");
   }
-  const resultado = await desativarMotoPecas(
-    usuario_id,
-    moto_id,
-    peca_id,
-
-  );
+  const resultado = await desativarMotoPecas(usuario_id, moto_id, peca_id);
 
   if (resultado.affectedRows === 0) {
     throw new AppError(404, "Não foi possível excluir a peça");

@@ -4,7 +4,7 @@ import { autenticar, autorizacaoAdmin } from "../autenticar";
 
 const router = Router();
 
-router.post('/', autenticar, autorizacaoAdmin, postPeca)
+router.post('/', autenticar, postPeca)
 router.get('/',autenticar , getPeca)
 
 export default router

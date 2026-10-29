@@ -8,6 +8,10 @@ const Nome = z.object({
 });
 
 export async function postPeca(req: Request, res: Response) {
+    const usuario_id = req.usuario_id;
+    if (typeof usuario_id !== "number") {
+      throw new AppError(401, "Usuário inválido");
+    }
     const body = req.body;
     const bodyValidado = await Nome.safeParseAsync(body);
 
@@ -20,11 +24,15 @@ export async function postPeca(req: Request, res: Response) {
 
     const nome = bodyValidado.data.nome;
 
-     await criarPeca(nome);
+     await criarPeca(usuario_id, nome);
     res.status(201).json({ message: "Peça cadastrada com sucesso"});
 }
 
 export async function getPeca(req: Request, res: Response) {
-    const resultado = await listarPecas();
+    const usuario_id = req.usuario_id;
+  if (typeof usuario_id !== "number") {
+    throw new AppError(401, "Usuário inválido");
+  }
+    const resultado = await listarPecas(usuario_id);
     res.status(200).json({ data: resultado });
 }
