@@ -1,6 +1,7 @@
 import { RowDataPacket } from "mysql2";
 import { ResultSetHeader } from "mysql2";
 import pool from "../db";
+import { AppError } from "../Erros/AppError";
 
 
 export async function criarMotoPeca(
@@ -8,14 +9,21 @@ export async function criarMotoPeca(
   peca_id: number,
   custo: number,
   intervalo_km: number,
+  usuario_id:number
 ) {
-  const [resultado] = await pool.query(
-    `INSERT INTO moto_peca (moto_id, peca_id, custo, intervalo_km) VALUES (?,?,?,?)
-            ON DUPLICATE KEY UPDATE
-        custo = VALUES(custo),
-        intervalo_km = VALUES(intervalo_km),
-        ativo = TRUE`,
-    [moto_id, peca_id, custo, intervalo_km],
+  const [resultado] = await pool.query<ResultSetHeader>(
+    `INSERT INTO moto_peca (moto_id, peca_id, custo, intervalo_km)
+      SELECT m.id, p.id, ?, ?
+      FROM moto m
+      JOIN peca p ON p.usuario_id = m.usuario_id 
+      WHERE m.id = ? 
+        AND p.id = ? 
+        AND m.usuario_id = ? 
+      ON DUPLICATE KEY UPDATE
+      custo = VALUES(custo),
+      intervalo_km = VALUES(intervalo_km),
+      ativo = TRUE;`,
+    [ custo, intervalo_km, moto_id, peca_id,usuario_id],
   );
 
   return resultado;
@@ -35,8 +43,8 @@ export async function listarMotoPecas(moto_id: number, usuario_id: number) {
         FROM moto_peca
         JOIN peca ON moto_peca.peca_id = peca.id
         JOIN moto ON moto_peca.moto_id = moto.id
-        WHERE moto_peca.moto_id = ? AND moto.usuario_id = ? AND moto_peca.ativo = TRUE`,
-    [moto_id, usuario_id],
+        WHERE moto_peca.moto_id = ? AND moto.usuario_id = ? AND moto_peca.ativo = TRUE AND peca.usuario_id=?`,
+    [moto_id, usuario_id, usuario_id],
   );
   return resultado;
 }
@@ -55,8 +63,10 @@ export async function editarMotoPecas(
         WHERE moto_peca.id = ? AND moto_peca.moto_id =? AND moto.usuario_id =? AND moto_peca.ativo = TRUE`,
     [custo, intervalo_km, peca_id, moto_id, usuario_id],
   );
+   
   return resultado;
 }
+
 
 export async function desativarMotoPecas(
   usuario_id: number,
