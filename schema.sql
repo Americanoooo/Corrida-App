@@ -25,8 +25,10 @@ CREATE TABLE moto (
 -- 2. Catálogo puro (só PK)
 CREATE TABLE peca (
   id    INT AUTO_INCREMENT PRIMARY KEY,
-  nome  VARCHAR(100) NOT NULL UNIQUE,
+  nome  VARCHAR(100) NOT NULL,
   usuario_id       INT NOT NULL,
+  ativo BOOLEAN NOT NULL DEFAULT TRUE,
+  UNIQUE (usuario_id, nome),
   FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );
 
