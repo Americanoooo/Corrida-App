@@ -74,9 +74,11 @@ export async function postMotoPeca(req: Request, res: Response) {
   if (resultado.affectedRows === 0) {
     throw new AppError(404, "Não foi possível criar a peça");
   }
+  const vinculoAtualizado = resultado.affectedRows === 2;
+  const resposta = vinculoAtualizado ? "Peça atualizada com sucesso." : "Peça da moto cadastrada com sucesso.";
   return res
     .status(201)
-    .json({ message: "Peça da moto cadastrada com sucesso", data: resultado });
+    .json({ message: resposta, data: resultado });
 }
 
 export async function postPecaVincularMoto(req: Request, res: Response) {
@@ -112,13 +114,13 @@ export async function postPecaVincularMoto(req: Request, res: Response) {
     intervalo_km,
   );
 
-    if (resultado.affectedRows === 0) {
+    if (resultado.dados.affectedRows === 0) {
     throw new AppError(404, "Não foi possível criar a peça");
   }
-
+    const resposta = resultado.vinculoAtualizado ? "Peça atualizada com sucesso." : "Peça da moto cadastrada e vinculada com sucesso."
     return res
     .status(201)
-    .json({ message: "Peça da moto cadastrada e vinculada com sucesso", data: resultado });
+    .json({ message: resposta, data: resultado });
 
 }
 

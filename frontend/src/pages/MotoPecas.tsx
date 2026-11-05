@@ -15,6 +15,7 @@ import { IconWrench, IconArrowLeft, IconPlus } from "../components/ui/icons";
 
 
 interface MotoPeca {
+  peca_id:number;
   id: number;
   nome: string;
   custo: number;
@@ -39,6 +40,7 @@ function MotoPecas() {
   const [novoNomePeca, setNovoNomePeca] = useState("");
 
   const [pecaEditando, setPecaEditando] = useState<MotoPeca | null>(null)
+  const [nomePeca, setNomePeca] = useState('')
   const [custoPeca, setCustoPeca] = useState('')
   const [intervaloKmPeca, setIntervaloKmPeca] = useState('')
   const [feedback, setFeedback] = useState<{ texto: string; tipo: "erro" | "ok" } | null>(null);
@@ -70,14 +72,17 @@ function MotoPecas() {
   async function handleVincular() {
     if (!pecaId || !custo || !intervaloKm) return setErro('Preencha todos os campos')
     try {
-      await apiFetch(`/motos/${motoId}/pecas`, {
+     const vincular =  await apiFetch(`/motos/${motoId}/pecas`, {
         method: "POST",
         body: JSON.stringify({
           peca_id: Number(pecaId),
           custo: Number(custo),
           intervalo_km: Number(intervaloKm),
         }),
-      });
+    
+    })
+  
+      mostrarToast(vincular.message, "ok");
       buscarPecas();
       setCusto('')
       setIntervaloKm('')
@@ -119,19 +124,41 @@ function MotoPecas() {
   }
 
   async function handleEditar() {
-    if (!custoPeca || !intervaloKmPeca) return setFeedback({ texto: 'Preencha todos os campos', tipo: 'erro' });
+    if (!nomePeca || !custoPeca || !intervaloKmPeca) return setFeedback({ texto: 'Preencha todos os campos', tipo: 'erro' });
 
     try {
-      await apiFetch(`/motos/${motoId}/pecas/${pecaEditando?.id}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          custo: Number(custoPeca),
-          intervalo_km: Number(intervaloKmPeca)
+      await Promise.all([
+        apiFetch(`/motos/${motoId}/pecas/${pecaEditando?.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            custo: Number(custoPeca),
+            intervalo_km: Number(intervaloKmPeca)
+          }),
         }),
-      })
+        apiFetch(`/pecas/${pecaEditando?.peca_id}`, {
+          method: "PATCH",
+          body: JSON.stringify({ nome: nomePeca }),
+        }),
+      ])
       mostrarToast('Peça atualizada com sucesso!', "ok")
       buscarPecas()
       setFeedback(null)
+    } catch (err: unknown) {
+      if (err instanceof ApiError && err.status < 500) {
+        mostrarToast(err.message, "erro");
+      } else {
+        mostrarToast("Algo deu errado. Tente novamente.", "erro");
+      }
+    }
+  }
+
+  async function handleRemover(peca: MotoPeca) {
+    try {
+      await apiFetch(`/motos/${motoId}/pecas/${peca.id}`, {
+        method: "DELETE",
+      })
+      mostrarToast('Peça removida com sucesso!', "ok")
+      buscarPecas()
     } catch (err: unknown) {
       if (err instanceof ApiError && err.status < 500) {
         mostrarToast(err.message, "erro");
@@ -163,6 +190,7 @@ function MotoPecas() {
 
   useEffect(() => {
     if (pecaEditando) {
+      setNomePeca(pecaEditando.nome)
       setCustoPeca(String(pecaEditando.custo))
       setIntervaloKmPeca(String(pecaEditando.intervalo_km))
 
@@ -217,12 +245,20 @@ function MotoPecas() {
                     Number(peca.custo) / Number(peca.intervalo_km),
                   )}
                 </p>
-                <button
-                  className="flex items-center justify-self-start sm:justify-self-end min-h-12 px-3 rounded-controle text-sm font-medium text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
-                  onClick={() => setPecaEditando(peca)}
-                >
-                  Editar
-                </button>
+                <div className="flex items-center gap-2 justify-self-start sm:justify-self-end">
+                  <button
+                    className="flex items-center min-h-12 px-3 rounded-controle text-sm font-medium text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
+                    onClick={() => setPecaEditando(peca)}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    className="flex items-center min-h-12 px-3 rounded-controle text-sm font-medium text-erro border border-erro/30 bg-transparent hover:bg-erro/10 active:bg-erro/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-erro/40"
+                    onClick={() => handleRemover(peca)}
+                  >
+                    Remover
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -285,7 +321,7 @@ function MotoPecas() {
                 <input
                   id="peca-nova-nome"
                   className="input-field"
-                  placeholder="Ex: Corrente"
+                  placeholder="Ex: Transmissão"
                   value={novoNomePeca}
                   onChange={(e) => setNovoNomePeca(e.target.value)}
                 />
@@ -333,10 +369,20 @@ function MotoPecas() {
 
         <Modal
           aberto={!!pecaEditando}
-          titulo={pecaEditando ? `Editar peça: ${pecaEditando.nome}` : "Editar peça"}
+          titulo={pecaEditando ? `Editar peça: ${capitalizar(pecaEditando.nome)}` : "Editar peça"}
           onFechar={() => { setPecaEditando(null); setFeedback(null); }}
         >
           <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="nome-peca-editando" className="text-sm font-medium text-texto-secundario">Nome</label>
+              <input
+                id="nome-peca-editando"
+                type="text"
+                className="input-field"
+                value={nomePeca}
+                onChange={(e) => setNomePeca(e.target.value)}
+              />
+            </div>
             <div className="flex flex-col gap-1.5">
               <label htmlFor="custo-peca-editando" className="text-sm font-medium text-texto-secundario">Custo</label>
               <input

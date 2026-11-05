@@ -55,6 +55,11 @@ export async function criarPecaVincularMoto(
             throw err
           }
           peca_id = existente[0].id
+
+          await conn.query<ResultSetHeader>(
+            "UPDATE peca SET ativo = TRUE WHERE id = ? AND usuario_id = ?",
+            [peca_id, usuario_id]
+          )
         }
 
       const [motoPeca] = await conn.query<ResultSetHeader>(
@@ -77,7 +82,8 @@ export async function criarPecaVincularMoto(
     }
 
     await conn.commit();
-    return motoPeca
+    const vinculoAtualizado = motoPeca.affectedRows === 2;
+    return {dados: motoPeca, vinculoAtualizado}
       }catch(err){
         console.error(err)
         await conn.rollback()

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { deletePeca, getPeca, postPeca } from "../controllers/pecaController";
+import { deletePeca, editarNomePeca, getPeca, postPeca } from "../controllers/pecaController";
 import { autenticar } from "../autenticar";
 
 const router = Router();
@@ -7,5 +7,6 @@ const router = Router();
 router.post('/', autenticar, postPeca)
 router.get('/',autenticar , getPeca)
 router.patch('/', autenticar, deletePeca)
+router.patch('/:pecaId', autenticar, editarNomePeca)
 
 export default router

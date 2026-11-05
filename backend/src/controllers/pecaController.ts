@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { criarPeca, excluirPeca, listarPecas } from "../models/pecaModel";
+import { criarPeca, editarPecaNome, excluirPeca, listarPecas } from "../models/pecaModel";
 import { AppError } from "../Erros/AppError";
 import * as z from "zod";
 
@@ -48,8 +48,29 @@ export async function deletePeca(req: Request, res: Response){
     throw new AppError(401, "Usuário inválido");
   }
 
-   const body = req.body;
-    const bodyValidado = await Peca.safeParseAsync(body);
+  const { pecaId } = req.params;
+  const peca_id = Number(pecaId);
+
+  
+  const resultado = await excluirPeca(peca_id ,usuario_id )
+  if(resultado.affectedRows ===0){
+    throw new AppError(400, "Não foi possível excluir a peça.")
+  }
+  res.status(200).json({message: "Peça excluída com sucesso"})
+
+}
+
+export async function editarNomePeca(req: Request, res:Response){
+         const usuario_id = req.usuario_id;
+  if (typeof usuario_id !== "number") {
+    throw new AppError(401, "Usuário inválido");
+  }
+
+  const { pecaId } = req.params;
+  const peca_id = Number(pecaId);
+
+  const body = req.body;
+    const bodyValidado = await Nome.safeParseAsync(body);
 
     if (!bodyValidado.success) {
       throw new AppError(
@@ -57,12 +78,11 @@ export async function deletePeca(req: Request, res: Response){
         bodyValidado.error.issues[0]?.message || "Nome inválido",
       );
     }
-    const {peca_id} = bodyValidado.data
+    const { nome } = bodyValidado.data
 
-  const resultado = await excluirPeca(peca_id ,usuario_id )
-  if(resultado.affectedRows ===0){
-    throw new AppError(400, "Não foi possível excluir a peça.")
+    const resultado = await editarPecaNome(nome, peca_id, usuario_id)
+      if(resultado.affectedRows ===0){
+    throw new AppError(400, "Não foi editar o nome da peça.")
   }
-  res.status(200).json({message: "Peça excluída com sucesso"})
-
+  res.status(200).json({message: "Nome alterado com sucesso"})
 }

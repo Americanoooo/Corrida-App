@@ -33,3 +33,11 @@ export async function excluirPeca(peca_id:number, usuario_id:number){
     );
     return resultado
 }
+
+export async function editarPecaNome( nome:string, peca_id:number, usuario_id:number){
+    const [resultado]= await pool.query<ResultSetHeader>(
+        'UPDATE peca SET nome = ? WHERE id = ? AND usuario_id = ?',
+        [nome, peca_id, usuario_id]
+    );
+    return resultado
+}
