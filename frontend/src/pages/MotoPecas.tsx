@@ -100,7 +100,7 @@ function MotoPecas() {
   async function handleCriarEVincular() {
     if (!novoNomePeca || !custo || !intervaloKm) return setErro('Preencha todos os campos');
     try {
-      await apiFetch(`/motos/${motoId}/pecas/criar`, {
+      const vincular = await apiFetch(`/motos/${motoId}/pecas/criar`, {
         method: "POST",
         body: JSON.stringify({
           nome: novoNomePeca, custo: Number(custo),
@@ -108,6 +108,7 @@ function MotoPecas() {
         }),
       });
 
+      mostrarToast(vincular.message, "ok");
       buscarPecas();
       setNovoNomePeca('');
       setCusto('');
