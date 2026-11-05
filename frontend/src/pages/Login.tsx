@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { apiFetch } from "../api";
-import { ApiError } from "../Erros/ApiError";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/ui/Button";
 import { IconEye, IconEyeOff, IconAlertCircle } from "../components/ui/icons";
-import TituloEscrito, { duracaoEscrita } from "../components/TituloEscrito";
+import { ApiError } from "../Erros/ApiError";
+
 
 function Login() {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ function Login() {
       localStorage.setItem("token", data.data.token);
       navigate("/motos");
     } catch (err) {
-      const msg = err instanceof ApiError && err.status < 500 ? err.message : "Email ou senha inválidos";
+      const msg = err instanceof ApiError ? err.message : "Email ou senha inválidos";
 
       setMensagem(msg);
     }
@@ -42,7 +42,7 @@ function Login() {
         });
         await handleLogin(email, senha);
     }catch(err){
-        const msg = err instanceof ApiError && err.status < 500 ? err.message : 'Erro ao cadastrar'
+        const msg = err instanceof ApiError ? err.message : 'Erro ao cadastrar'
         setMensagem(msg)
     }
   }
@@ -53,10 +53,6 @@ function Login() {
     setSenha('')
     setNome('')
   }
-
-  const tituloTexto = cadastrar ? "Vamos começar" : "Bem-vindo de volta";
-  const atrasoSubtitulo = duracaoEscrita(tituloTexto) - 60;
-  const atrasoApoio = atrasoSubtitulo + 90;
 
   return (
     <div className="min-h-dvh relative flex flex-col items-center justify-center bg-fundo px-4 py-10">
@@ -70,21 +66,17 @@ function Login() {
       <div className="w-full max-w-sm motion-safe:animate-slide-up flex flex-col gap-7">
         <div key={cadastrar ? "cadastro" : "login"} className="flex flex-col gap-1.5">
           <h1 className="text-3xl font-bold text-texto tracking-tight">
-            <TituloEscrito texto={tituloTexto} />
+            <span className="inline-block motion-safe:animate-line-reveal">
+              {cadastrar ? "Vamos começar" : "Bem-vindo de volta"}
+            </span>
           </h1>
           <p className="text-base font-medium text-texto">
-            <span
-              className="inline-block motion-safe:animate-surgir"
-              style={{ animationDelay: `${atrasoSubtitulo}ms` }}
-            >
+            <span className="inline-block motion-safe:animate-line-reveal motion-safe:[animation-delay:120ms]">
               Seu lucro real, corrida a corrida.
             </span>
           </p>
           <p className="text-sm text-texto-secundario">
-            <span
-              className="inline-block motion-safe:animate-surgir"
-              style={{ animationDelay: `${atrasoApoio}ms` }}
-            >
+            <span className="inline-block motion-safe:animate-line-reveal motion-safe:[animation-delay:220ms]">
               {cadastrar ? "Crie sua conta para começar a registrar." : "Entre para continuar seus registros."}
             </span>
           </p>

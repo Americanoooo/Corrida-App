@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import {
   buscarMotoPorId,
   criarMotoPeca,
+  criarPecaVincularMoto,
   desativarMotoPecas,
   editarMotoPecas,
   listarMotoPecas,
@@ -12,6 +13,16 @@ import { AppError } from "../Erros/AppError";
 
 const Peca = z.object({
   peca_id: z.number({ error: "Peça inválida" }),
+  custo: z
+    .number({ error: "Custo inválido" })
+    .positive("Custo deve ser maior que zero"),
+  intervalo_km: z
+    .number({ error: "Intervalo inválido" })
+    .positive("Intervalo deve ser maior que zero"),
+});
+
+const CriarPecaMoto = z.object({
+  nome: z.string({ error: "Peça inválida" }).min(2),
   custo: z
     .number({ error: "Custo inválido" })
     .positive("Custo deve ser maior que zero"),
@@ -53,10 +64,64 @@ export async function postMotoPeca(req: Request, res: Response) {
   }
 
   const { peca_id, custo, intervalo_km } = bodyVerificado.data;
-  const resultado = await criarMotoPeca(moto_id, peca_id, custo, intervalo_km);
+  const resultado = await criarMotoPeca(
+    moto_id,
+    peca_id,
+    custo,
+    intervalo_km,
+    usuario_id,
+  );
+  if (resultado.affectedRows === 0) {
+    throw new AppError(404, "Não foi possível criar a peça");
+  }
+  const vinculoAtualizado = resultado.affectedRows === 2;
+  const resposta = vinculoAtualizado ? "Peça atualizada com sucesso." : "Peça da moto cadastrada com sucesso.";
   return res
     .status(201)
-    .json({ message: "Peça da moto cadastrada com sucesso", data: resultado });
+    .json({ message: resposta, data: resultado });
+}
+
+export async function postPecaVincularMoto(req: Request, res: Response) {
+  const usuario_id = req.usuario_id;
+  if (typeof usuario_id !== "number") {
+    throw new AppError(401, "Usuário inválido");
+  }
+
+  const { motoId } = req.params;
+  const moto_id = Number(motoId);
+
+  const moto = await buscarMotoPorId(moto_id);
+  if (moto === undefined || moto.usuario_id !== usuario_id) {
+    throw new AppError(404, "Moto não encontrada");
+  }
+
+  const body = req.body;
+  const bodyVerificado = await CriarPecaMoto.safeParseAsync(body);
+  if (!bodyVerificado.success) {
+    throw new AppError(
+      400,
+      bodyVerificado.error.issues[0]?.message ?? "Dados inválidos",
+    );
+  }
+
+  const { nome, custo, intervalo_km } = bodyVerificado.data;
+
+  const resultado = await criarPecaVincularMoto(
+    moto_id,
+    nome,
+    usuario_id,
+    custo,
+    intervalo_km,
+  );
+
+    if (resultado.dados.affectedRows === 0) {
+    throw new AppError(404, "Não foi possível criar a peça");
+  }
+    const resposta = resultado.vinculoAtualizado ? "Peça atualizada com sucesso." : "Peça da moto cadastrada e vinculada com sucesso."
+    return res
+    .status(201)
+    .json({ message: resposta, data: resultado });
+
 }
 
 export async function getMotoPecas(req: Request, res: Response) {
@@ -118,8 +183,6 @@ export async function patchMotoPecas(req: Request, res: Response) {
   return res.status(200).json({ message: "Peça atualizada!" });
 }
 
-
-
 export async function deletarMotoPecas(req: Request, res: Response) {
   const usuario_id = req.usuario_id;
   if (typeof usuario_id !== "number") {
@@ -134,12 +197,7 @@ export async function deletarMotoPecas(req: Request, res: Response) {
   if (moto === undefined || moto.usuario_id !== usuario_id) {
     throw new AppError(404, "Moto não encontrada");
   }
-  const resultado = await desativarMotoPecas(
-    usuario_id,
-    moto_id,
-    peca_id,
-
-  );
+  const resultado = await desativarMotoPecas(usuario_id, moto_id, peca_id);
 
   if (resultado.affectedRows === 0) {
     throw new AppError(404, "Não foi possível excluir a peça");

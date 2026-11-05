@@ -2,7 +2,6 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import pool from "../db";
 import { AppError } from "../Erros/AppError";
 import { calcularCustoCombustivel, calcularCustoKm } from "../calculos";
-import { error } from "node:console";
 
 export async function criarCorrida(
   usuario_id: number,
