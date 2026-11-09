@@ -17,6 +17,192 @@ Onde parei / próximo passo:
 ---
 
 
+## 2026-10-18 — tipagem de verificarAdmin, teto do DECIMAL(5,2) e contrato de resposta {message}/{data}
+
+O que refatoramos/decidimos:
+Três débitos da fila, em ordem. (1) usuarioModel.ts: verificarAdmin usava RowDataPacket puro (index
+signature [coluna: string]: any), então resultado[0]?.admin tipava como any e não dava erro de build se a
+coluna fosse renomeada numa migration futura - criada interface Admin extends RowDataPacket { admin: number },
+passada como generic em pool.query<Admin[]>, mantendo o ?? 0 (fail-closed) que já tinha sido decisão
+consciente numa sessão anterior (11/10), mesmo sabendo que hoje o único chamador (autorizacaoAdmin, via
+if(!verificar)) trataria undefined e 0 como equivalentes - contrato explícito > comportamento que só funciona
+por coincidência de falsy. (2) Teto do DECIMAL(5,2) em corrida.kms_rodados: confirmado que o MySQL (sql_mode
+com STRICT_TRANS_TABLES, engine InnoDB) rejeita com erro em vez de truncar silenciosamente valores fora de
+precisão - elimina o risco de corrupção de dado. Decisão de negócio: manter o teto (999,99 km é folgado pra
+uma "corrida" no domínio atual, mesmo em cenário de registro acumulado), só adicionando validação zod
+.max(999.99) com mensagem clara, em vez de deixar o erro cru do MySQL estourar como 500 pro cliente - decisão
+documentada pra não precisar ser revisitada à toa. (3) Contrato de resposta inconsistente entre os 13
+endpoints de controller: convenção adotada - {message} pra sucesso sem retorno útil, {data} pra leitura
+(lista ou item), {message, data} só quando o frontend de fato consome o dado extra. Mudança tocou todo
+backend/controllers e os pages do frontend que leem via apiFetch. No processo, achamos uma assimetria real:
+postMoto devolvia data: {id: insertId} mas o frontend (Motos.tsx) nunca capturava esse retorno, só
+recarregava a lista inteira via buscarMotos() - dado devolvido especulativamente, sem consumidor, removido.
+Limpeza complementar: resultado descartado sem uso em postPeca/postUsuario (variável atribuída e nunca lida).
+
+Ponto crítico da sessão, não é refactor: essa mudança de contrato (a mais arquiteturalmente relevante do dia)
+foi gerada por uma IA externa a pedido do Cauã, cobrindo os 13 endpoints de uma vez, antes de eu revisar. Isso
+vai contra o objetivo que ele declarou no início ("entender as decisões e o porquê delas"). Na revisão, ele
+não conseguiu reconstituir de cabeça o antes/depois de um endpoint específico sem abrir o arquivo - sinal de
+que a revisão tinha sido superficial. Testou manualmente clicando em cada fluxo no navegador antes do commit,
+o que cobre comportamento, mas não substitui o aprendizado de ter escrito a decisão linha por linha.
+
+Conceito que aprendi (em uma frase):
+Tipo honesto (interface explícita) > any escondido atrás de index signature, porque o segundo não erra no
+build quando o schema muda - ele só quebra em produção, silenciosamente.
+
+Nome de mercado:
+Tipo que mente (RowDataPacket com index signature [coluna: string]: any), fail-closed explícito vs
+comportamento que só funciona por coincidência de falsy, sql_mode STRICT_TRANS_TABLES (precisão de DECIMAL
+rejeitada vs truncada silenciosamente), leaky abstraction (erro de banco vazando como 500), dado especulativo
+sem consumidor (variação do YAGNI aplicada a contrato de API em vez de feature), envelope de resposta /
+response envelope pattern, dead/unused variable.
+
+Débitos que ficaram:
+#4 (storage.ts sem CREATE TABLE IF NOT EXISTS pra tabela migrations), #5 (confirmar se proxy-addr 2.0.8 ainda
+é vulnerável / fechar npm audit do frontend) e #6 (tabelas do Corrida App em defaultdb vs database dedicado
+corrida-app) continuam na fila, não tocados hoje. ADR da decisão de contrato de resposta ({message}/{data})
+ainda não escrito - sugerido, não feito, por falta de tempo na sessão. Confirmar se tsconfig do backend tem
+noUnusedLocals ligado (o build não acusou os resultado sem uso em postPeca/postUsuario antes da limpeza
+manual - se a flag existisse e estivesse ativa, teria pego sozinho). Reflexão em aberto, não resolvida: até
+que ponto delegar a escrita de uma decisão de arquitetura pra uma IA externa é aceitável nesse projeto de
+aprendizado - vale retomar explicitamente numa sessão futura, não só como nota de rodapé.
+
+Onde parei / próximo passo:
+Seguir a fila na ordem: #4 (storage.ts / Umzug bootstrap), #5 (proxy-addr e npm audit), #6 (defaultdb vs
+corrida-app). Escrever o ADR do contrato de resposta enquanto o contexto ainda está fresco. Revisitar com o
+Cauã o uso de IA externa pra gerar código de decisões arquiteturais antes da próxima mudança grande.
+
+## 2026-10-15 — ADR-002 escrito (RBAC + migration tooling)
+
+O que refatoramos/decidimos:
+Escrevemos o ADR-002, pauta mais atrasada do projeto (as decisões de RBAC e Umzug já estavam implementadas
+desde 08/10 e 11/10, só sem registro formal). Documentamos as duas decisões juntas, porque nasceram da mesma
+sessão e são causalmente ligadas: RBAC precisou da coluna `admin`, que precisou de um jeito versionado de
+aplicar `ALTER TABLE` nos dois bancos reais (local e Aiven). Conferimos no código atual que as duas decisões
+continuam de pé como documentadas (checagem fresca de admin no banco via `verificarAdmin`, resposta 403,
+migration via Umzug rodada manualmente) antes de redigir o texto. `docs/adr/002-rbac-migration-tooling.md`.
+
+Conceito que aprendi (em uma frase):
+Um ADR não precisa ser escrito no instante da decisão — registrar depois, revisitando o código real pra
+confirmar que a decisão ainda é a que está implementada, também vale, e evita que o contexto se perca.
+
+Nome de mercado:
+ADR escrito a posteriori (vs no momento da decisão), auditoria de decisão documentada contra código vivo.
+
+Débitos que ficaram (levantamento, não resolvidos agora):
+`verificarAdmin` (`usuarioModel.ts:31-37`) ainda retorna `resultado[0]?.admin` como `any` (RowDataPacket sem
+generic de coluna). `storage.ts` ainda não tem `CREATE TABLE IF NOT EXISTS` pra tabela de controle
+`migrations` — bootstrap continua manual em banco novo. Migration da coluna `admin` rodada só local; decisão
+consciente de esperar um deploy maior pra rodar no Aiven, ainda não confirmada se já rodou. Tabelas do Corrida
+App continuam em `defaultdb` no Aiven, não no database dedicado `corrida-app` (vazio) — desorganização antiga,
+não bug, nunca resolvida. Contrato de resposta entre endpoints continua inconsistente (decisão de design de
+API, não faxina mecânica). `proxy-addr` (crítico, IP spoofing via trust proxy) continua sem confirmação se a
+versão instalada está fora da faixa vulnerável; audit do frontend nunca foi revisado por completo. Soft delete
++ upsert em `moto_peca` (14/10) e decisão 200 vs 201 em `postMotoPeca`: ver débitos da sessão abaixo
+(2026-10-15 — fechando pendência de commits), ainda abertos.
+
+Onde parei / próximo passo:
+Confirmar via `git log`/Aiven se a migration do `admin` já rodou em produção. Rodar `npm audit` de novo no
+backend e no frontend pra fechar o débito do `proxy-addr`. Decidir se o soft delete + upsert de `moto_peca`
+vira ADR-003 ou extensão do ADR-001 (seguir o débito já registrado na sessão abaixo).
+
+
+## 2026-10-15 — fechando pendência de commits (soft delete em moto_peca)
+
+O que refatoramos/decidimos:
+Retomamos o débito da sessão de 14/10: migration+schema de moto_peca.ativo já tinham sido commitados antes
+dessa sessão. Faltava separar o resto do git status (motoPecaModel.ts, corridaModel.ts, motoPecaController.ts,
+motoRoutes.ts, MotoPecas.tsx, Motos.tsx, design-system.md) em commits coerentes. Cauã propôs inicialmente
+juntar tudo num "ciclo completo" pra não quebrar o app; questionamos a diferença entre "quebra o build" (critério
+objetivo, inegociável) e "fica sem sentido sozinho" (sensação subjetiva, não é motivo pra juntar commit). A partir
+disso ele percebeu sozinho que model builda isolado e que controller+rota é a camada que consome o model, logo
+são dois commits em sequência, não um só. Segunda decisão: corridaModel.ts (que só lê moto_peca via SELECT com
+filtro ativo=TRUE pro snapshot de corrida) e motoPecaModel.ts (que escreve - upsert, listagem, desativar) viviam
+em pastas/features diferentes, mas Cauã decidiu agrupá-los no mesmo commit porque mudam pela mesma razão: a
+invariante nova (ativo=TRUE em todo WHERE que lê moto_peca). Commits finais: 1) motoPecaModel.ts + corridaModel.ts
+juntos; 2) motoPecaController.ts + motoRoutes.ts juntos. MotoPecas.tsx/Motos.tsx/design-system.md ficaram de fora
+de propósito - Cauã confirmou que são puramente visuais (não lógica nova) e preferiu não commitar um estado de
+design pela metade, já que esse trabalho ainda está em andamento na branch Design.
+
+Conceito que aprendi (em uma frase):
+Agrupar commits pela "razão de mudar" (reason to change) é o mesmo critério do Single Responsibility Principle,
+só que aplicado à granularidade de commit em vez de classe/função - importa mais a decisão que motivou a mudança
+do que a pasta ou feature onde o arquivo mora.
+
+Nome de mercado:
+Cohesion by reason to change, Single Responsibility Principle aplicado a commit, build limpo em cada commit como
+critério objetivo de "sistema funcionando" vs "faz sentido sozinho" como critério subjetivo que não deve decidir
+granularidade.
+
+Débitos que ficaram:
+Commit de MotoPecas.tsx/Motos.tsx/design-system.md ainda pendente, aguardando o trabalho de design na branch
+Design terminar. Decisão 200 vs 201 em postMotoPeca (quando criarMotoPeca cai no branch de reativação via upsert
+em vez de criar linha nova) ainda não resolvida. ADR da decisão de soft delete + upsert em moto_peca ainda não
+escrito. Débitos antigos continuam na fila: ADR-002 (RBAC + migration tooling), confirmação de proxy-addr/npm
+audit do frontend (sessão de 13/10).
+
+Onde parei / próximo passo:
+Terminar o trabalho de design do frontend (branch Design) e só então commitar MotoPecas.tsx/Motos.tsx/
+design-system.md juntos. Decidir 200 vs 201 no upsert de postMotoPeca. Escrever o ADR da decisão de soft delete
++ upsert em moto_peca, estendendo ou não o ADR-001. Voltar aos débitos antigos (ADR-002, npm audit) numa sessão
+futura.
+
+## 2026-10-14 — soft delete em moto_peca + upsert (ON DUPLICATE KEY UPDATE)
+
+O que refatoramos/decidimos:
+Partimos de uma rota de deletar moto_peca que o Cauã tinha rascunhado com dois bugs reais: WHERE
+usuario_id = ? numa tabela que não tem essa coluna (moto_peca não tem usuario_id direto, posse é só
+via JOIN com moto) e um parâmetro moto_id recebido e nunca usado na query. Antes de corrigir o código,
+voltamos pra decisão de arquitetura: o DELETE físico já era bloqueado pela FK corrida_peca.moto_peca_id
+(ON DELETE RESTRICT, documentado no ADR-001) sempre que a peça tinha histórico de corrida - comportamento
+esperado, não bug. Decidimos soft delete via coluna moto_peca.ativo (BOOLEAN DEFAULT TRUE), com o filtro
+AND ativo = TRUE replicado em todo WHERE que lê moto_peca pra decisão de negócio: listarMotoPecas,
+editarMotoPecas (edição direta de peça inativa agora dá 404) e a query de criarCorrida que busca peças
+pra montar o snapshot. Identificamos que soft delete colide com o UNIQUE(moto_id, peca_id): reativar uma
+peça removida via INSERT simples bateria em ER_DUP_ENTRY, então criarMotoPeca virou upsert (INSERT ...
+ON DUPLICATE KEY UPDATE custo=VALUES(custo), intervalo_km=VALUES(intervalo_km), ativo=TRUE) numa única
+instrução atômica, em vez de duas queries (catch do erro + update separado), evitando uma race condition
+real entre dois requests concorrentes tentando reativar a mesma peça. Decidimos manter o verbo HTTP DELETE
+na rota mesmo com UPDATE por dentro (o verbo descreve intenção do cliente, não implementação interna) e
+200 (não 201) na resposta, porque nenhum recurso novo é criado. Na revisão do diff, achamos e o Cauã
+corrigiu sozinho: (1) desativarMotoPecas recebia moto_id mas não usava no WHERE, permitindo desativar uma
+peça de outra moto do mesmo usuário via URL inconsistente - corrigido adicionando moto.id = ? na condição;
+(2) no meio da correção, introduziu um mismatch real entre 3 valores no array de params e só 2 placeholders
+na query - também achado e corrigido sozinho depois de uma pergunta direta. Testado manualmente no Insomnia
+(decisão consciente de não montar infra de teste de integração pra isso agora - custo vs benefício, projeto
+nunca testou model com banco real). schema.sql foi atualizado com a coluna ativo, fechando o loop de schema
+drift que já tinha mordido o projeto antes. Decisão explícita: trabalho de design/frontend (classes de botão
+em Motos.tsx/MotoPecas.tsx, docs/design-system.md) que apareceu misturado no mesmo working directory vai
+pra commits separados, não entra junto com essa feature.
+
+Conceito que aprendi (em uma frase):
+Soft delete não é só troca DELETE->UPDATE numa função isolada - é uma invariante que precisa ser repetida em
+todo WHERE que lê a tabela (listagem, edição, criação de corrida), e a UNIQUE constraint que protegia contra
+duplicata passa a empurrar pra um upsert, porque uma linha "removida" ainda ocupa o lugar da chave única.
+
+Nome de mercado:
+soft delete, upsert / INSERT ... ON DUPLICATE KEY UPDATE, atomicidade evitando race condition (TOCTOU) sem
+precisar de duas queries separadas, ownership check via JOIN vs coluna direta inexistente, HTTP verb como
+contrato de intenção do cliente (não implementação interna) - DELETE continua DELETE mesmo com UPDATE por
+dentro, 200 vs 201 vs 204, schema drift, mismatch de placeholder/params count no mysql2 (bind parameters).
+
+Débitos que ficaram:
+Decisão pendente: postMotoPeca sempre devolve 201, mesmo quando criarMotoPeca cai no branch de reativação
+via ON DUPLICATE KEY UPDATE (upsert) em vez de criar linha nova - avaliar se vale diferenciar 200/201 via
+resultado.affectedRows ou se é precisão que ninguém usa (YAGNI), ainda não decidido. Confirmar se a coluna
+ativo foi aplicada via arquivo de migration rastreado (Umzug) ou via ALTER manual de novo - checar git
+status. Commits ainda não separados/feitos: pelo menos migration+schema, models, controller+rota, e
+design-system aparte. ADR não escrito pra essa decisão (soft delete + upsert em moto_peca) - candidato a
+estender o ADR-001 ou abrir um novo. Débitos antigos ainda na fila: ADR-002 (RBAC + migration tooling),
+confirmação de proxy-addr/npm audit do frontend (sessão de 13/10).
+
+Onde parei / próximo passo:
+Rodar git status pra confirmar migration rastreada. Separar e fazer os commits (migration/schema primeiro,
+depois models, depois controller+rota, design-system num commit isolado). Decidir 200 vs 201 no upsert.
+Escrever o ADR dessa decisão (soft delete + upsert) antes de esquecer o contexto fresco. Voltar aos débitos
+antigos (ADR-002, npm audit) numa sessão futura.
+
+
 ## 2026-10-13 — timing attack no login + triagem de npm audit
 
 O que refatoramos/decidimos:

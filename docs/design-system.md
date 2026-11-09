@@ -42,7 +42,7 @@ Nome do produto: **Lucrei**. Tagline de loja: "Lucrei: Ganho Real". Dentro do ap
 
 ## Tipografia
 
-Família: Inter (carregada via Google Fonts no `index.html`). Escala curta, poucos tamanhos:
+Família: Instrument Sans (carregada via Google Fonts no `index.html`). Escala curta, poucos tamanhos:
 
 | Papel | Tamanho | Peso |
 |---|---|---|
@@ -92,6 +92,17 @@ Família: Inter (carregada via Google Fonts no `index.html`). Escala curta, pouc
 
 As classes `.card`, `.input-field`, `.select-field` continuam em `index.css` (usadas dentro dos componentes acima e em campos soltos). `.btn-primary`/`.btn-secondary`/`.btn-danger` ficam só como fallback — prefira `Button`.
 
+## Ações dentro de item de lista (chip)
+
+Em `Motos` (chip "Peças" e "Editar") e `MotoPecas` (chip "Editar"), as ações inline no card/linha não usam o `Button` — são pequenas demais pro padding dele e convivem lado a lado. Usam um chip próprio, sempre na família `--color-marca` (único acento vivo do app, pra não virar arco-íris), diferenciado por **peso visual**, não por matiz:
+
+| Peso | Classe | Significa |
+|---|---|---|
+| Preenchido | `text-marca bg-marca/10 hover:bg-marca/20 active:bg-marca/25` | ação que **navega** pra outra tela (ex.: "Peças" → `/motos/:id/pecas`) |
+| Contornado | `text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15` | ação que **fica na mesma tela** (ex.: "Editar" abre modal local) |
+
+Por que não slate: cinza cru não é token e não existe no `@theme`. Por que não vermelho/âmbar: `erro`/`prejuízo` e `aviso` já têm significado reservado (perda, alerta) — usá-los aqui pra "editar" confundiria o sinal em outra tela.
+
 ## Padrão de tela — lista + criar
 
 Esqueleto usado em Corridas, Motos e MotoPecas (telas autenticadas, com `Layout` → `Navbar`/`BottomNav`):
@@ -118,7 +129,9 @@ Regras do padrão:
 - **Mesmo ritmo vertical:** `flex flex-col gap-6` no container da página.
 - **Hero é exceção, não regra.** Só existe quando a tela tem um número que é a razão dela existir (lucro, em Corridas). Motos/MotoPecas não têm — forçar um hero ali seria decoração, não hierarquia.
 
-Login foge desse esqueleto de propósito: é tela pública de autenticação (sem lista, sem `Fab`), com sua própria composição (hero de marca + abas Entrar/Criar conta).
+Login foge desse esqueleto de propósito: é tela pública de autenticação (sem lista, sem `Fab`, sem `Faixa`), com sua própria composição — título + campos + ação, sem card envolvendo o formulário.
+
+**Exceção de raio no Login:** inputs e botão usam `rounded-full` (override local via classe utilitária por cima de `.input-field`/`Button`, não um 4º token em `@theme`) em vez dos raios padrão do sistema. Decisão deliberada pra essa tela, a partir de uma referência visual trazida pelo usuário (campos e CTA em formato pílula, sem borda pesada, sem header colorido) — não é precedente pra usar `rounded-full` em Motos/Corridas/MotoPecas, que continuam em `rounded-controle`.
 
 ## Pendências conhecidas
 
