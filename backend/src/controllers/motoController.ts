@@ -30,7 +30,7 @@ export async function postMoto(req: Request, res: Response) {
   const { modelo, km_litro } = bodyValidado.data;
 
   const resultado = await criarMoto(usuario_id, modelo, km_litro);
-  res.status(201).json({ message: "Moto criada"});
+  res.status(201).json({ message: "Moto criada com sucesso."});
 }
 
 export async function getMoto(req: Request, res: Response) {
