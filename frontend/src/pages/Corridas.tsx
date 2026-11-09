@@ -142,7 +142,7 @@ function Corridas() {
       return setErro("Preencha todos os campos");
     }
     try {
-      await apiFetch(`/motos/${moto_id}/corridas`, {
+     const corrida = await apiFetch(`/motos/${moto_id}/corridas`, {
         method: "POST",
         body: JSON.stringify({
           kms_rodados: Number(kmsRodados),
@@ -155,6 +155,8 @@ function Corridas() {
       setKmsRodados("");
       setReceita("");
       setGasolina("");
+      mostrarToast(corrida.message, "ok")
+
     } catch (err: unknown) {
       if(err instanceof ApiError && err.status ===400){
         setErro('Nenhuma peça cadastrada')
