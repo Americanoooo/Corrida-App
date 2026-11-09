@@ -78,6 +78,7 @@ function Corridas() {
   const [fim, setFim] = useState("");
   const [motoCorridaFiltro, setMotoCorridaFiltro]=useState('')
   const [carregando, setCarregando]=useState(true)
+  const [enviando, setEnviando]=useState(false)
   const mostrarToast = useToast()
 
   // Estado só de UI — abrir/fechar os sheets. Não afeta busca nem cadastro.
@@ -141,6 +142,7 @@ function Corridas() {
     if (!gasolina || !receita || !kmsRodados || !data) {
       return setErro("Preencha todos os campos");
     }
+    setEnviando(true);
     try {
      const corrida = await apiFetch(`/motos/${moto_id}/corridas`, {
         method: "POST",
@@ -164,6 +166,8 @@ function Corridas() {
       const message =
         err instanceof ApiError && err.status < 500 ? err.message : "Erro ao cadastrar corridas";
 mostrarToast(message, "erro")
+    } finally {
+      setEnviando(false);
     }
     buscarCorridas();
   }
@@ -333,7 +337,7 @@ setFim(hoje);
 
           {erro && <p className="text-sm text-erro text-center">{erro}</p>}
 
-          <Button variant="primary" className="w-full" onClick={handleRegistrar}>
+          <Button variant="primary" className="w-full" loading={enviando} onClick={handleRegistrar}>
             Cadastrar
           </Button>
         </div>
