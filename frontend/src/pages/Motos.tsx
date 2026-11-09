@@ -30,6 +30,8 @@ function Motos() {
   const [kmLitroEditando, setKmLitroEditando] = useState("");
   const mostrarToast = useToast();
   const [feedback, setFeedback] = useState<{texto:string; tipo:"erro" | "ok"} | null>(null);
+  const [cadastrando, setCadastrando] = useState(false);
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
   // Estado só de UI — abrir/fechar o sheet de nova moto.
   const [novaMotoAberta, setNovaMotoAberta] = useState(false);
@@ -62,6 +64,7 @@ function Motos() {
   async function handleCadastrar() {
     if (!modelo || !km_litro) return setErro("Preencha todos os campos");
 
+    setCadastrando(true);
     try {
       const moto = await apiFetch("/motos", {
         method: "POST",
@@ -73,13 +76,15 @@ function Motos() {
       setKmLitro("");
       setErro("");
       mostrarToast(moto.message,"ok")
-      
+
     } catch (err: unknown) {
       if(err instanceof ApiError && err.status < 500){
         mostrarToast(err.message, "erro");
       }else{
             mostrarToast("Algo deu errado. Tente novamente.", "erro");
       }
+  } finally {
+    setCadastrando(false);
   }
   }
 
@@ -87,6 +92,7 @@ function Motos() {
     if (!modeloEditando || !kmLitroEditando)
       return setFeedback({texto:'Preencha todos os campos', tipo:'erro'});
     if(kmLitroEditando === "0") return setFeedback({texto: "Preencha com um número válido", tipo: "erro"})
+    setSalvandoEdicao(true);
     try {
 
       await apiFetch(`/motos/${motoEditando?.id}`, {
@@ -102,6 +108,8 @@ function Motos() {
       }else{
             mostrarToast("Algo deu errado. Tente novamente.", "erro");
       }
+  } finally {
+    setSalvandoEdicao(false);
   }
   }
 
@@ -209,7 +217,7 @@ function Motos() {
 
           {erro && <p className="text-sm text-erro text-center">{erro}</p>}
 
-          <Button variant="primary" onClick={handleCadastrar}>
+          <Button variant="primary" loading={cadastrando} onClick={handleCadastrar}>
             Cadastrar
           </Button>
         </div>
@@ -243,8 +251,8 @@ function Motos() {
           </div>
           <p className={feedbackClasse}>{feedback?.texto}</p>
           <div className="flex flex-col gap-2">
-            <Button variant="primary" onClick={handleEditar}>Salvar</Button>
-            <Button variant="secondary" onClick={() => { setMotoEditando(null); setFeedback(null); }}>
+            <Button variant="primary" loading={salvandoEdicao} onClick={handleEditar}>Salvar</Button>
+            <Button variant="secondary" disabled={salvandoEdicao} onClick={() => { setMotoEditando(null); setFeedback(null); }}>
               Cancelar
             </Button>
           </div>
