@@ -63,7 +63,7 @@ function Motos() {
     if (!modelo || !km_litro) return setErro("Preencha todos os campos");
 
     try {
-      await apiFetch("/motos", {
+      const moto = await apiFetch("/motos", {
         method: "POST",
         body: JSON.stringify({ modelo, km_litro: Number(km_litro) }),
       });
@@ -72,6 +72,8 @@ function Motos() {
       setModelo("");
       setKmLitro("");
       setErro("");
+      mostrarToast(moto.message,"ok")
+      
     } catch (err: unknown) {
       if(err instanceof ApiError && err.status < 500){
         mostrarToast(err.message, "erro");
