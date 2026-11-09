@@ -14,9 +14,11 @@ function Login() {
   const [mensagem, setMensagem] = useState("");
   const [cadastrar, setCadastro] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [carregando, setCarregando] = useState(false);
 
   async function handleLogin(email: string, senha: string) {
     if(!email|| !senha)return setMensagem('Preencha todos os campos')
+    setCarregando(true);
     try {
       const data = await apiFetch("/usuario/login", {
         method: "POST",
@@ -29,12 +31,15 @@ function Login() {
       const msg = err instanceof ApiError ? err.message : "Email ou senha inválidos";
 
       setMensagem(msg);
+    } finally {
+      setCarregando(false);
     }
   }
 
   async function handleCadastrar(nome:string, email:string, senha:string){
        if(!email|| !senha|| !nome)return setMensagem('Preencha todos os campos')
 
+    setCarregando(true);
     try{
             await apiFetch('/usuario/cadastrar', {
             method: 'POST',
@@ -44,6 +49,8 @@ function Login() {
     }catch(err){
         const msg = err instanceof ApiError ? err.message : 'Erro ao cadastrar'
         setMensagem(msg)
+    } finally {
+      setCarregando(false);
     }
   }
 
@@ -149,11 +156,11 @@ function Login() {
           )}
 
           {!cadastrar ? (
-            <Button variant="primary" className="w-full !rounded-full" onClick={() => handleLogin(email, senha)}>
+            <Button variant="primary" className="w-full !rounded-full" loading={carregando} onClick={() => handleLogin(email, senha)}>
               Entrar
             </Button>
           ) : (
-            <Button variant="primary" className="w-full !rounded-full" onClick={() => handleCadastrar(nome, email, senha)}>
+            <Button variant="primary" className="w-full !rounded-full" loading={carregando} onClick={() => handleCadastrar(nome, email, senha)}>
               Criar conta
             </Button>
           )}
