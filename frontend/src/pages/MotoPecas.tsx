@@ -44,6 +44,9 @@ function MotoPecas() {
   const [custoPeca, setCustoPeca] = useState('')
   const [intervaloKmPeca, setIntervaloKmPeca] = useState('')
   const [feedback, setFeedback] = useState<{ texto: string; tipo: "erro" | "ok" } | null>(null);
+  const [salvandoPeca, setSalvandoPeca] = useState(false);
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
+  const [removendoId, setRemovendoId] = useState<number | null>(null);
 
   const feedbackClasse = !feedback ? "invisible"
     : feedback.tipo === "erro"
@@ -71,6 +74,7 @@ function MotoPecas() {
 
   async function handleVincular() {
     if (!pecaId || !custo || !intervaloKm) return setErro('Preencha todos os campos')
+    setSalvandoPeca(true);
     try {
      const vincular =  await apiFetch(`/motos/${motoId}/pecas`, {
         method: "POST",
@@ -79,9 +83,9 @@ function MotoPecas() {
           custo: Number(custo),
           intervalo_km: Number(intervaloKm),
         }),
-    
+
     })
-  
+
       mostrarToast(vincular.message, "ok");
       buscarPecas();
       setCusto('')
@@ -93,12 +97,15 @@ function MotoPecas() {
       } else {
         mostrarToast("Algo deu errado. Tente novamente.", "erro");
       }
+    } finally {
+      setSalvandoPeca(false);
     }
   }
 
 
   async function handleCriarEVincular() {
     if (!novoNomePeca || !custo || !intervaloKm) return setErro('Preencha todos os campos');
+    setSalvandoPeca(true);
     try {
       const vincular = await apiFetch(`/motos/${motoId}/pecas/criar`, {
         method: "POST",
@@ -121,12 +128,15 @@ function MotoPecas() {
       } else {
         mostrarToast("Algo deu errado. Tente novamente.", "erro");
       }
+    } finally {
+      setSalvandoPeca(false);
     }
   }
 
   async function handleEditar() {
     if (!nomePeca || !custoPeca || !intervaloKmPeca) return setFeedback({ texto: 'Preencha todos os campos', tipo: 'erro' });
 
+    setSalvandoEdicao(true);
     try {
       await Promise.all([
         apiFetch(`/motos/${motoId}/pecas/${pecaEditando?.id}`, {
@@ -150,10 +160,13 @@ function MotoPecas() {
       } else {
         mostrarToast("Algo deu errado. Tente novamente.", "erro");
       }
+    } finally {
+      setSalvandoEdicao(false);
     }
   }
 
   async function handleRemover(peca: MotoPeca) {
+    setRemovendoId(peca.id);
     try {
       await apiFetch(`/motos/${motoId}/pecas/${peca.id}`, {
         method: "DELETE",
@@ -166,6 +179,8 @@ function MotoPecas() {
       } else {
         mostrarToast("Algo deu errado. Tente novamente.", "erro");
       }
+    } finally {
+      setRemovendoId(null);
     }
   }
 
@@ -248,15 +263,23 @@ function MotoPecas() {
                 </p>
                 <div className="flex items-center gap-2 justify-self-start sm:justify-self-end">
                   <button
-                    className="flex items-center min-h-12 px-3 rounded-controle text-sm font-medium text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
+                    className="flex items-center min-h-12 px-3 rounded-controle text-sm font-medium text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                     onClick={() => setPecaEditando(peca)}
+                    disabled={removendoId === peca.id}
                   >
                     Editar
                   </button>
                   <button
-                    className="flex items-center min-h-12 px-3 rounded-controle text-sm font-medium text-erro border border-erro/30 bg-transparent hover:bg-erro/10 active:bg-erro/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-erro/40"
+                    className="flex items-center gap-1.5 min-h-12 px-3 rounded-controle text-sm font-medium text-erro border border-erro/30 bg-transparent hover:bg-erro/10 active:bg-erro/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-erro/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
                     onClick={() => handleRemover(peca)}
+                    disabled={removendoId === peca.id}
                   >
+                    {removendoId === peca.id && (
+                      <svg className="h-4 w-4 animate-spin motion-reduce:animate-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    )}
                     Remover
                   </button>
                 </div>
@@ -361,6 +384,7 @@ function MotoPecas() {
 
             <Button
               variant="primary"
+              loading={salvandoPeca}
               onClick={modoPeca === 'existente' ? handleVincular : handleCriarEVincular}
             >
               {modoPeca === 'existente' ? 'Cadastrar' : 'Criar e vincular'}
@@ -408,8 +432,8 @@ function MotoPecas() {
             </div>
             <p className={feedbackClasse}>{feedback?.texto}</p>
             <div className="flex flex-col gap-2">
-              <Button variant="primary" onClick={handleEditar}>Salvar</Button>
-              <Button variant="secondary" onClick={() => { setPecaEditando(null); setFeedback(null); }}>
+              <Button variant="primary" loading={salvandoEdicao} onClick={handleEditar}>Salvar</Button>
+              <Button variant="secondary" disabled={salvandoEdicao} onClick={() => { setPecaEditando(null); setFeedback(null); }}>
                 Cancelar
               </Button>
             </div>
