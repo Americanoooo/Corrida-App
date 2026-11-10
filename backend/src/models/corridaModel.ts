@@ -16,7 +16,7 @@ export async function criarCorrida(
     await conn.beginTransaction();
 
     const [motos] = await conn.query<RowDataPacket[]>(
-      "SELECT usuario_id, km_litro FROM moto WHERE id =?",
+      "SELECT usuario_id, km_litro FROM moto WHERE id =? AND ativo = TRUE",
       [moto_id],
     );
     const moto = motos[0];

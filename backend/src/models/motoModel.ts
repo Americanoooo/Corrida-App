@@ -14,7 +14,7 @@ return resultado
 
 export async function listarMoto(usuario_id:number){
     const [resultado] = await pool.query(
-        'SELECT * FROM moto WHERE usuario_id = ?',
+        'SELECT * FROM moto WHERE usuario_id = ? AND ativo = true',
         [usuario_id]
     );
     return resultado
@@ -23,7 +23,7 @@ export async function listarMoto(usuario_id:number){
 export async function editarMoto(usuario_id:number,modelo:string, km_litro: number, moto_id:number){
 
     const [resultado]= await pool.query<ResultSetHeader>(
-        'UPDATE moto SET modelo = ?, km_litro= ? WHERE id= ? AND usuario_id = ?',
+        'UPDATE moto SET modelo = ?, km_litro= ? WHERE id= ? AND usuario_id = ? AND ativo = true',
         [modelo, km_litro, moto_id, usuario_id]
     )
 
@@ -32,4 +32,17 @@ export async function editarMoto(usuario_id:number,modelo:string, km_litro: numb
     }
 
     return resultado
+}
+
+export async function desativarMoto(moto_id:number, usuario_id:number){
+   const [resultado] = await pool.query<ResultSetHeader>(
+    'UPDATE moto SET ativo = false WHERE id = ? AND usuario_id = ?',
+    [moto_id, usuario_id]
+   )
+
+   if(resultado.affectedRows === 0){
+    throw new AppError(404, "Não foi possível excluir a moto")
+   }
+
+   return resultado
 }

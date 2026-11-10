@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { criarMoto, editarMoto, listarMoto } from "../models/motoModel";
+import { criarMoto, desativarMoto, editarMoto, listarMoto } from "../models/motoModel";
 import { AppError } from "../Erros/AppError";
 
 import * as z from "zod";
@@ -10,6 +10,7 @@ const Moto = z.object({
     .number({ error: "Km / L inválido" })
     .positive({ error: "Km / L deve ser positivo" }),
 });
+
 
 export async function postMoto(req: Request, res: Response) {
   const usuario_id = req.usuario_id;
@@ -64,5 +65,18 @@ export async function patchMoto(req: Request, res: Response) {
   const moto_id = Number(motoId);
    await editarMoto(usuario_id, modelo, km_litro, moto_id);
 
-  res.status(200).json({ message: "Moto atualizada" });
+  res.status(200).json({ message: "Moto atualizada com sucesso" });
+}
+
+export async function deleteMoto(req:Request, res:Response){
+     const usuario_id = req.usuario_id;
+  if (typeof usuario_id !== "number") {
+    throw new AppError(401, "Usuário inválido");
+  }
+  
+    const { motoId } = req.params;
+    const moto_id = Number(motoId);
+
+    await desativarMoto(moto_id, usuario_id)
+    res.status(200).json({message: "Moto excluída com sucesso"})
 }
