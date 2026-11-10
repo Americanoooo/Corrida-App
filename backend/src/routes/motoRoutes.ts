@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getMoto, patchMoto, postMoto } from "../controllers/motoController";
+import { deleteMoto, getMoto, patchMoto, postMoto } from "../controllers/motoController";
 import { deletarMotoPecas, getMotoPecas, patchMotoPecas, postMotoPeca, postPecaVincularMoto } from "../controllers/motoPecaController";
 import { getCorridaId, postCorrida } from "../controllers/corridaController";
 import { autenticar } from "../autenticar";
@@ -16,6 +16,7 @@ router.post('/:motoId/corridas', autenticar, postCorrida)
 router.patch('/:motoId', autenticar, patchMoto)
 router.patch('/:motoId/pecas/:pecaId', autenticar, patchMotoPecas)
 router.delete('/:motoId/pecas/:pecaId', autenticar, deletarMotoPecas)
+router.delete('/:motoId',autenticar, deleteMoto)
 
 
 

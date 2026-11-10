@@ -32,6 +32,8 @@ function Motos() {
   const [feedback, setFeedback] = useState<{texto:string; tipo:"erro" | "ok"} | null>(null);
   const [cadastrando, setCadastrando] = useState(false);
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
+  const [confirmandoDesativacao, setConfirmandoDesativacao] = useState(false);
+  const [desativando, setDesativando] = useState(false);
 
   // Estado só de UI — abrir/fechar o sheet de nova moto.
   const [novaMotoAberta, setNovaMotoAberta] = useState(false);
@@ -118,9 +120,29 @@ function Motos() {
       setModeloEditando(motoEditando.modelo);
       setKmLitroEditando(String(motoEditando.km_litro));
       setFeedback(null)
-
+      setConfirmandoDesativacao(false)
     }
   }, [motoEditando]);
+
+  async function handleDesativar() {
+    if (!motoEditando) return;
+    setDesativando(true);
+    try {
+      await apiFetch(`/motos/${motoEditando.id}`, { method: "DELETE" });
+      mostrarToast("Moto excluída com sucesso", "ok");
+      setMotoEditando(null);
+      buscarMotos();
+    } catch (err: unknown) {
+      if (err instanceof ApiError && err.status < 500) {
+        mostrarToast(err.message, "erro");
+      } else {
+        mostrarToast("Algo deu errado. Tente novamente.", "erro");
+      }
+    } finally {
+      setDesativando(false);
+      setConfirmandoDesativacao(false);
+    }
+  }
 
   return (
     <>
@@ -255,6 +277,32 @@ function Motos() {
             <Button variant="secondary" disabled={salvandoEdicao} onClick={() => { setMotoEditando(null); setFeedback(null); }}>
               Cancelar
             </Button>
+          </div>
+
+          <div className="border-t border-borda pt-4">
+            {confirmandoDesativacao ? (
+              <div className="flex flex-col gap-3">
+                <p className="text-sm text-texto-secundario text-center">
+                  Tem certeza? A moto deixa de aparecer nas corridas e peças, mas o histórico é mantido.
+                </p>
+                <div className="flex flex-col gap-2">
+                  <Button variant="danger" loading={desativando} onClick={handleDesativar}>
+                    Sim, excluir moto
+                  </Button>
+                  <Button variant="ghost" disabled={desativando} onClick={() => setConfirmandoDesativacao(false)}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="w-full text-sm text-erro/80 hover:text-erro transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:underline"
+                onClick={() => setConfirmandoDesativacao(true)}
+              >
+                Excluir moto
+              </button>
+            )}
           </div>
         </div>
       </Modal>
