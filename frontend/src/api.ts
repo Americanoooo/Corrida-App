@@ -20,8 +20,14 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}){
 
     const data = await res.json();
 
+        if(res.status === 404 && data.message === "Rota não encontrada"){
+            console.error(`Rota não encontrada: ${endpoint}`);
+            throw new ApiError(500, "Algo deu errado. Tente novamente.")
+        }
+
+
     if(!res.ok){
-        throw new ApiError (res.status ,data.error || data.message|| 'Erro na requisição')
+        throw new ApiError (res.status ,data.error || data.message|| 'Algo deu errado. Tente novamente.')
     }
     return data;
 }
