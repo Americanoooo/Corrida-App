@@ -140,7 +140,7 @@ export async function relatorioPorPeriodo(
   return { receitaTotal, desgasteTotal, combustivelTotal, lucroTotal };
 }
 
-export async function buscarTodasCorridas(usuario_id: number, inicio?: string,fim?:string) {
+export async function listarCorridas(usuario_id: number, inicio?: string,fim?:string) {
   let sql =     `SELECT
   corrida.id, corrida.data, corrida.receita, corrida.kms_rodados, moto.modelo,
   corrida.receita
@@ -168,7 +168,7 @@ sql += ` ORDER BY corrida.data DESC`;
   return linhas;
 }
 
-export async function deleteCorrida(corrida_id:number, usuario_id:number){
+export async function excluirCorrida(corrida_id:number, usuario_id:number){
     const [resultado]= await pool.query<ResultSetHeader>(
       'UPDATE corrida SET ativo = false WHERE id = ? AND usuario_id = ?',
     [corrida_id, usuario_id]

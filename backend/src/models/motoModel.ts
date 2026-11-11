@@ -34,7 +34,7 @@ export async function editarMoto(usuario_id:number,modelo:string, km_litro: numb
     return resultado
 }
 
-export async function desativarMoto(moto_id:number, usuario_id:number){
+export async function excluirMoto(moto_id:number, usuario_id:number){
    const [resultado] = await pool.query<ResultSetHeader>(
     'UPDATE moto SET ativo = false WHERE id = ? AND usuario_id = ?',
     [moto_id, usuario_id]
