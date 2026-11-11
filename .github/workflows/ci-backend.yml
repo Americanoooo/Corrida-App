@@ -5,9 +5,13 @@ on:
     branches: ['main']
     paths:
       - 'backend/**'
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'backend/**'
 
 jobs:
-  testar-front:
+  testar-back:
     runs-on: ubuntu-latest
     defaults:
       run:

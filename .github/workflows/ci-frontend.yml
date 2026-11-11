@@ -5,6 +5,10 @@ on:
     branches: ['main']
     paths:
       - 'frontend/**'
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'frontend/**'
 
 jobs:
   testar-front:
@@ -19,4 +23,4 @@ jobs:
         with:
           node-version: '20'
       - run: npm install
-
+      - run: npm run build
