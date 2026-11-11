@@ -46,7 +46,8 @@ function MotoPecas() {
   const [feedback, setFeedback] = useState<{ texto: string; tipo: "erro" | "ok" } | null>(null);
   const [salvandoPeca, setSalvandoPeca] = useState(false);
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
-  const [removendoId, setRemovendoId] = useState<number | null>(null);
+  const [confirmandoRemocao, setConfirmandoRemocao] = useState(false);
+  const [removendo, setRemovendo] = useState(false);
 
   const feedbackClasse = !feedback ? "invisible"
     : feedback.tipo === "erro"
@@ -165,13 +166,15 @@ function MotoPecas() {
     }
   }
 
-  async function handleRemover(peca: MotoPeca) {
-    setRemovendoId(peca.id);
+  async function handleRemover() {
+    if (!pecaEditando) return;
+    setRemovendo(true);
     try {
-      await apiFetch(`/motos/${motoId}/pecas/${peca.id}`, {
+      await apiFetch(`/motos/${motoId}/pecas/${pecaEditando.id}`, {
         method: "DELETE",
       })
       mostrarToast('Peça removida com sucesso!', "ok")
+      setPecaEditando(null)
       buscarPecas()
     } catch (err: unknown) {
       if (err instanceof ApiError && err.status < 500) {
@@ -180,7 +183,8 @@ function MotoPecas() {
         mostrarToast("Algo deu errado. Tente novamente.", "erro");
       }
     } finally {
-      setRemovendoId(null);
+      setRemovendo(false);
+      setConfirmandoRemocao(false);
     }
   }
 
@@ -209,7 +213,7 @@ function MotoPecas() {
       setNomePeca(pecaEditando.nome)
       setCustoPeca(String(pecaEditando.custo))
       setIntervaloKmPeca(String(pecaEditando.intervalo_km))
-
+      setConfirmandoRemocao(false)
     }
 
   }, [pecaEditando])
@@ -263,24 +267,10 @@ function MotoPecas() {
                 </p>
                 <div className="flex items-center gap-2 justify-self-start sm:justify-self-end">
                   <button
-                    className="flex items-center min-h-12 px-3 rounded-controle text-sm font-medium text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+                    className="flex items-center min-h-12 px-3 rounded-controle text-sm font-medium text-marca border border-marca/30 bg-transparent hover:bg-marca/10 active:bg-marca/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca/40"
                     onClick={() => setPecaEditando(peca)}
-                    disabled={removendoId === peca.id}
                   >
                     Editar
-                  </button>
-                  <button
-                    className="flex items-center gap-1.5 min-h-12 px-3 rounded-controle text-sm font-medium text-erro border border-erro/30 bg-transparent hover:bg-erro/10 active:bg-erro/15 active:scale-95 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-erro/40 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
-                    onClick={() => handleRemover(peca)}
-                    disabled={removendoId === peca.id}
-                  >
-                    {removendoId === peca.id && (
-                      <svg className="h-4 w-4 animate-spin motion-reduce:animate-none" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z" />
-                      </svg>
-                    )}
-                    Remover
                   </button>
                 </div>
               </div>
@@ -436,6 +426,32 @@ function MotoPecas() {
               <Button variant="secondary" disabled={salvandoEdicao} onClick={() => { setPecaEditando(null); setFeedback(null); }}>
                 Cancelar
               </Button>
+            </div>
+
+            <div className="border-t border-borda pt-4">
+              {confirmandoRemocao ? (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-texto-secundario text-center">
+                    Tem certeza? A peça deixa de valer pra essa moto, mas o histórico de corridas é mantido.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <Button variant="danger" loading={removendo} onClick={handleRemover}>
+                      Sim, remover peça
+                    </Button>
+                    <Button variant="ghost" disabled={removendo} onClick={() => setConfirmandoRemocao(false)}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="w-full text-sm text-erro/80 hover:text-erro transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:underline"
+                  onClick={() => setConfirmandoRemocao(true)}
+                >
+                  Remover peça desta moto
+                </button>
+              )}
             </div>
           </div>
         </Modal>
