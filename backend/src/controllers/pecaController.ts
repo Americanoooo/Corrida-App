@@ -60,7 +60,7 @@ export async function deletePeca(req: Request, res: Response){
 
 }
 
-export async function editarNomePeca(req: Request, res:Response){
+export async function patchPeca(req: Request, res:Response){
          const usuario_id = req.usuario_id;
   if (typeof usuario_id !== "number") {
     throw new AppError(401, "Usuário inválido");

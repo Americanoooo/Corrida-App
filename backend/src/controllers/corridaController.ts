@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { buscarCorridaPorId, buscarTodasCorridas, criarCorrida, deleteCorrida, relatorioPorPeriodo } from "../models/corridaModel";
+import { buscarCorridaPorId, listarCorridas, criarCorrida, excluirCorrida, relatorioPorPeriodo } from "../models/corridaModel";
 import { AppError } from "../Erros/AppError";
 
 import * as z from "zod"; 
@@ -105,12 +105,12 @@ export async function getCorridas(req: Request, res:Response){
             throw new AppError(401, "Usuário inválido")
         }
 
-        const resultado = await buscarTodasCorridas(usuario_id, inicio, fim)
+        const resultado = await listarCorridas(usuario_id, inicio, fim)
         res.status(200).json({ data: resultado })
 
 }
 
-export async function excluirCorrida(req:Request, res:Response){
+export async function deleteCorrida(req:Request, res:Response){
 
       const usuario_id = req.usuario_id
 
@@ -121,7 +121,7 @@ export async function excluirCorrida(req:Request, res:Response){
         const { corridaId } = req.params;
         const corrida_id = Number(corridaId);
 
-        const resultado = await deleteCorrida(corrida_id, usuario_id)
+        const resultado = await excluirCorrida(corrida_id, usuario_id)
 
         res.status(200).json({message: "Corrida excluída com sucesso."})
 

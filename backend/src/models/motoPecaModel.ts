@@ -137,7 +137,7 @@ export async function editarMotoPecas(
 }
 
 
-export async function desativarMotoPecas(
+export async function excluirMotoPecas(
   usuario_id: number,
   moto_id: number,
   peca_id: number,

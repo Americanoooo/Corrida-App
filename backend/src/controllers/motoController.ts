@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { criarMoto, desativarMoto, editarMoto, listarMoto } from "../models/motoModel";
+import { criarMoto, excluirMoto, editarMoto, listarMoto } from "../models/motoModel";
 import { AppError } from "../Erros/AppError";
 
 import * as z from "zod";
@@ -77,6 +77,6 @@ export async function deleteMoto(req:Request, res:Response){
     const { motoId } = req.params;
     const moto_id = Number(motoId);
 
-    await desativarMoto(moto_id, usuario_id)
+    await excluirMoto(moto_id, usuario_id)
     res.status(200).json({message: "Moto excluída com sucesso"})
 }
