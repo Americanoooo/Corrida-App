@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { buscarCorridaPorId, buscarTodasCorridas, criarCorrida, relatorioPorPeriodo } from "../models/corridaModel";
+import { buscarCorridaPorId, buscarTodasCorridas, criarCorrida, deleteCorrida, relatorioPorPeriodo } from "../models/corridaModel";
 import { AppError } from "../Erros/AppError";
 
 import * as z from "zod"; 
@@ -24,6 +24,8 @@ const FiltroCorridas = z.object({
 }).refine(q => !q.inicio || !q.fim || q.inicio <= q.fim, {
     message: "data inválida, fim não pode ser anterior ao inicio"
 })
+
+
 
 export async function postCorrida(req: Request, res:Response){
 
@@ -108,3 +110,19 @@ export async function getCorridas(req: Request, res:Response){
 
 }
 
+export async function excluirCorrida(req:Request, res:Response){
+
+      const usuario_id = req.usuario_id
+
+         if(typeof usuario_id  !== "number"){
+        throw new AppError(401, "Usuário inválido")
+            }
+        
+        const { corridaId } = req.params;
+        const corrida_id = Number(corridaId);
+
+        const resultado = await deleteCorrida(corrida_id, usuario_id)
+
+        res.status(200).json({message: "Corrida excluída com sucesso."})
+
+}

@@ -6,7 +6,7 @@ const router = Router();
 
 router.post('/', autenticar, postPeca)
 router.get('/',autenticar , getPeca)
-router.patch('/:pecaId', autenticar, deletePeca)
+router.delete('/:pecaId', autenticar, deletePeca)
 router.patch('/:pecaId', autenticar, editarNomePeca)
 
 export default router
