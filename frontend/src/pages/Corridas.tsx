@@ -26,6 +26,16 @@ interface Corrida {
   lucro_real: number;
   data: number;
 }
+interface PecaDoCusto {
+  nome: string;
+  custo_km: number;
+  custo_na_corrida: number;
+}
+interface DetalheCorrida {
+  custo_combustivel: number;
+  custo_desgaste: number;
+  pecas: PecaDoCusto[];
+}
 
 // Agrupamento por dia é só apresentação — mesmo tipo de soma que já existia
 // pra totalLucro, só organizada por chave de data em vez de uma soma só.
@@ -84,6 +94,11 @@ function Corridas() {
   // Estado só de UI — abrir/fechar os sheets. Não afeta busca nem cadastro.
   const [formAberto, setFormAberto] = useState(false);
   const [filtroAberto, setFiltroAberto] = useState(false);
+  const [corridaSelecionada, setCorridaSelecionada] = useState<Corrida | null>(null);
+  const [detalheCorrida, setDetalheCorrida] = useState<DetalheCorrida | null>(null);
+  const [carregandoDetalhe, setCarregandoDetalhe] = useState(false);
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
 
 
     const corridasFiltradas = motoCorridaFiltro
@@ -172,6 +187,40 @@ mostrarToast(message, "erro")
     buscarCorridas();
   }
 
+  async function handleSelecionarCorrida(corrida: Corrida) {
+    setCorridaSelecionada(corrida);
+    setDetalheCorrida(null);
+    setCarregandoDetalhe(true);
+    try {
+      const resposta = await apiFetch(`/corridas/buscar/${corrida.id}`);
+      setDetalheCorrida(resposta.data);
+    } catch {
+      // Breakdown é um extra sobre os dados já exibidos pelo resumo da lista — se falhar, o modal segue usável.
+    } finally {
+      setCarregandoDetalhe(false);
+    }
+  }
+
+  async function handleExcluirCorrida() {
+    if (!corridaSelecionada) return;
+    setExcluindo(true);
+    try {
+      await apiFetch(`/corridas/${corridaSelecionada.id}`, { method: "DELETE" });
+      mostrarToast("Corrida excluída com sucesso", "ok");
+      setCorridaSelecionada(null);
+      buscarCorridas(inicio, fim);
+    } catch (err: unknown) {
+      if (err instanceof ApiError && err.status < 500) {
+        mostrarToast(err.message, "erro");
+      } else {
+        mostrarToast("Algo deu errado. Tente novamente.", "erro");
+      }
+    } finally {
+      setExcluindo(false);
+      setConfirmandoExclusao(false);
+    }
+  }
+
   function filtrarMes() {
     const agora = new Date();
     const inicioH = new Date(agora.getFullYear(), agora.getMonth(), 1)
@@ -256,7 +305,13 @@ setFim(hoje);
           />
         ) : (
           gruposDoDia.map((grupo) => (
-            <GrupoDoDia key={grupo.dataFormatada} rotulo={grupo.rotulo} lucroDia={grupo.lucroDia} corridas={grupo.itens} />
+            <GrupoDoDia
+              key={grupo.dataFormatada}
+              rotulo={grupo.rotulo}
+              lucroDia={grupo.lucroDia}
+              corridas={grupo.itens}
+              onSelecionar={handleSelecionarCorrida}
+            />
           ))
         )}
       </div>
@@ -416,6 +471,98 @@ setFim(hoje);
             Fechar
           </Button>
         </div>
+      </Modal>
+
+      <Modal
+        aberto={!!corridaSelecionada}
+        titulo="Detalhes da corrida"
+        onFechar={() => { setCorridaSelecionada(null); setDetalheCorrida(null); setConfirmandoExclusao(false); }}
+      >
+        {corridaSelecionada && (
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-1.5 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-texto-secundario">Moto</span>
+                <span className="font-medium text-texto">{corridaSelecionada.modelo}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-texto-secundario">Data</span>
+                <span className="font-medium text-texto">
+                  {new Date(corridaSelecionada.data).toLocaleDateString("pt-BR")}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-texto-secundario">Km rodados</span>
+                <span className="font-medium text-texto tabular-nums">{corridaSelecionada.kms_rodados} km</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-texto-secundario">Receita</span>
+                <span className="font-medium text-texto tabular-nums">{formatarMoeda(corridaSelecionada.receita)}</span>
+              </div>
+
+              {carregandoDetalhe ? (
+                <div className="flex flex-col gap-1.5 motion-safe:animate-pulse">
+                  <div className="h-4 rounded bg-slate-100" />
+                  <div className="h-4 rounded bg-slate-100" />
+                </div>
+              ) : detalheCorrida && (
+                <>
+                  <div className="flex items-center justify-between text-texto-secundario">
+                    <span>Combustível</span>
+                    <span className="tabular-nums">- {formatarMoeda(detalheCorrida.custo_combustivel)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-texto-secundario">
+                    <span>Desgaste de peças</span>
+                    <span className="tabular-nums">- {formatarMoeda(detalheCorrida.custo_desgaste)}</span>
+                  </div>
+                  {detalheCorrida.pecas.length > 0 && (
+                    <div className="flex flex-col gap-1 pl-3 border-l border-borda text-xs text-texto-secundario">
+                      {detalheCorrida.pecas.map((peca, i) => (
+                        <div key={i} className="flex items-center justify-between">
+                          <span className="truncate">{peca.nome}</span>
+                          <span className="tabular-nums shrink-0">- {formatarMoeda(peca.custo_na_corrida)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-texto-secundario">Lucro</span>
+                <span className={`font-semibold tabular-nums ${Number(corridaSelecionada.lucro_real) >= 0 ? "text-lucro" : "text-prejuizo"}`}>
+                  {formatarMoeda(corridaSelecionada.lucro_real)}
+                </span>
+              </div>
+            </div>
+
+            <div className="border-t border-borda pt-4">
+              {confirmandoExclusao ? (
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-texto-secundario text-center">
+                    Tem certeza? A corrida sai do seu histórico e dos relatórios.
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    <Button variant="danger" loading={excluindo} onClick={handleExcluirCorrida}>
+                      Sim, excluir corrida
+                    </Button>
+                    <Button variant="ghost" disabled={excluindo} onClick={() => setConfirmandoExclusao(false)}>
+                      Cancelar
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  className="w-full text-sm text-erro/80 hover:text-erro transition-colors duration-150 cursor-pointer focus-visible:outline-none focus-visible:underline"
+                  onClick={() => setConfirmandoExclusao(true)}
+                >
+                  Excluir corrida
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </Modal>
       </div>
     </>

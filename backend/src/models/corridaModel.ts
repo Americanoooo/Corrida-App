@@ -72,7 +72,7 @@ export async function buscarCorridaPorId(
         JOIN moto ON corrida.moto_id = moto.id
         JOIN moto_peca ON corrida_peca.moto_peca_id = moto_peca.id
         JOIN peca ON moto_peca.peca_id = peca.id 
-        WHERE corrida.id =? AND corrida.usuario_id =?`,
+        WHERE corrida.id =? AND corrida.usuario_id =? AND corrida.ativo = TRUE`,
     [corrida_id, usuario_id],
   );
   if (linhas[0] === undefined){
@@ -124,7 +124,7 @@ export async function relatorioPorPeriodo(
             FROM corrida_peca GROUP BY corrida_id) AS desgaste
             ON corrida.id = desgaste.corrida_id
         JOIN moto ON corrida.moto_id = moto.id
-        WHERE corrida.usuario_id =? AND corrida.data BETWEEN ? AND ?`,
+        WHERE corrida.usuario_id =? AND corrida.data BETWEEN ? AND ? AND corrida.ativo = TRUE`,
     [usuario_id, inicio, fim],
   );
  //AVISO Caso algum dia essa query ganhe um GROUP BY corrida.id (por exemplo, pra detalhar por corrida em vez de somar tudo), r pode voltar a ser undefined sem nenhum aviso do compilador.
@@ -152,7 +152,7 @@ JOIN (
   FROM corrida_peca GROUP BY corrida_id
 ) AS desgaste ON corrida.id = desgaste.corrida_id
 JOIN moto ON corrida.moto_id = moto.id
-WHERE corrida.usuario_id = ?`
+WHERE corrida.usuario_id = ? AND corrida.ativo = TRUE`
 
 const params:any[] = [usuario_id]
 
@@ -168,4 +168,13 @@ sql += ` ORDER BY corrida.data DESC`;
   return linhas;
 }
 
-
+export async function deleteCorrida(corrida_id:number, usuario_id:number){
+    const [resultado]= await pool.query<ResultSetHeader>(
+      'UPDATE corrida SET ativo = false WHERE id = ? AND usuario_id = ?',
+    [corrida_id, usuario_id]
+    )
+    if(resultado.affectedRows === 0){
+      throw new AppError(404, 'Não foi possível excluír a corrida')
+    }
+    return resultado;
+}
