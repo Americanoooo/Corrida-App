@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api";
 import { formatarMoeda } from "../utils/FormatarMoeda";
+import { dataLocalISO, formatarDataISO } from "../utils/DataLocal";
 import { ApiError } from "../Erros/ApiError";
 import { useToast } from "../context/ToastContext";
 import PageHeader from "../components/ui/PageHeader";
@@ -24,7 +25,7 @@ interface Corrida {
   kms_rodados: number;
   receita: number;
   lucro_real: number;
-  data: number;
+  data: string;
 }
 interface PecaDoCusto {
   nome: string;
@@ -50,7 +51,7 @@ function rotuloDoDia(dataFormatada: string) {
 function agruparPorDia(corridas: Corrida[]) {
   const grupos = new Map<string, Corrida[]>();
   for (const c of corridas) {
-    const chave = new Date(c.data).toLocaleDateString("pt-BR");
+    const chave = formatarDataISO(c.data);
     if (!grupos.has(chave)) grupos.set(chave, []);
     grupos.get(chave)!.push(c);
   }
@@ -81,8 +82,7 @@ function Corridas() {
   const [kmsRodados, setKmsRodados] = useState("");
   const [receita, setReceita] = useState("");
   const [gasolina, setGasolina] = useState("");
-      const hoje = new Date().toISOString().split("T")[0];
-  const [data, setData] = useState(hoje);
+  const [data, setData] = useState(dataLocalISO());
   const [erro, setErro] = useState("");
   const [inicio, setInicio] = useState("");
   const [fim, setFim] = useState("");
@@ -223,27 +223,25 @@ mostrarToast(message, "erro")
 
   function filtrarMes() {
     const agora = new Date();
-    const inicioH = new Date(agora.getFullYear(), agora.getMonth(), 1)
-      .toISOString()
-      .split("T")[0];
-    const fimH = new Date().toISOString().split("T")[0];
+    const inicioH = dataLocalISO(new Date(agora.getFullYear(), agora.getMonth(), 1));
+    const fimH = dataLocalISO();
     setInicio(inicioH);
     setFim(fimH);
   }
 
   function filtrarHoje() {
-  const hoje = new Date().toISOString().split("T")[0];
-setInicio(hoje);
-setFim(hoje);
+    const hoje = dataLocalISO();
+    setInicio(hoje);
+    setFim(hoje);
   }
 
   function filtrarSemana() {
-  const seteDiasAtras = new Date();
-  seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
-  const inicioH = seteDiasAtras.toISOString().split("T")[0];
-  const hoje = new Date().toISOString().split("T")[0];   // ← hoje, não dia 1
-  setInicio(inicioH);
-  setFim(hoje);
+    const seteDiasAtras = new Date();
+    seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
+    const inicioH = dataLocalISO(seteDiasAtras);
+    const hoje = dataLocalISO();
+    setInicio(inicioH);
+    setFim(hoje);
   }
 
   return (
@@ -488,7 +486,7 @@ setFim(hoje);
               <div className="flex items-center justify-between">
                 <span className="text-texto-secundario">Data</span>
                 <span className="font-medium text-texto">
-                  {new Date(corridaSelecionada.data).toLocaleDateString("pt-BR")}
+                  {formatarDataISO(corridaSelecionada.data)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
