@@ -383,7 +383,7 @@ mostrarToast(message, "erro")
               className="input-field"
               type="date"
               value={data}
-              max={hoje}
+              max={dataLocalISO()}
               onChange={(e) => setData(e.target.value)}
             />
           </div>
