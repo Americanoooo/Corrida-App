@@ -7,7 +7,7 @@ interface CorridaResumo {
   kms_rodados: number;
   receita: number;
   lucro_real: number;
-  data: number;
+  data: string;
 }
 
 interface GrupoDoDiaProps {

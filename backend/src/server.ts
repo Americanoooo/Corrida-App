@@ -12,8 +12,15 @@ import { AppError } from "./Erros/AppError";
 
 dotenv.config();
 
+    if(!process.env.FRONTEND_URL){
+        console.error("FRONTEND_URL não foi definida")
+         throw new Error("FRONTEND_URL não foi definida");
+    }
+
 const app=express();
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL
+}));
 app.use(express.json());
 
 
